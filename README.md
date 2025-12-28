@@ -188,7 +188,6 @@ Configure global plot style settings with LaTeX rendering.
 
 ### Utility Functions
 
-- `kscale(values)`: Convert values to thousands (divide by 1000)
 - `new_alpha(color, alpha)`: Create new color with specified alpha
 - `blend_color(rgba1, rgba2)`: Blend two RGBA colors
 

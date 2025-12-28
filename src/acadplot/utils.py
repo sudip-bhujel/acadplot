@@ -19,10 +19,6 @@ def new_alpha(
     return (c[0], c[1], c[2], alpha)
 
 
-def kscale(values: Iterable[float]) -> List[float]:
-    return [i / 1000 for i in values]
-
-
 markers = {
     "square": ("s", 3.5),
     "triangle_up": ("^", 4),
