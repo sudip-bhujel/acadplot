@@ -64,7 +64,7 @@ def draw(
     )
 
 
-def plot(
+def plot_line(
     lines: List[Tuple[List[float], List[float], str | int, str | int, str]],
     location: str,
     label: Tuple[str, str] = ("x-label", "y-label"),
@@ -149,7 +149,7 @@ if __name__ == "__main__":
     ]
 
     # # Single plot usage (unchanged)
-    plot(
+    plot_line(
         data,
         "upper left",
         ystart=min(min(y) for _, y, _, _, _ in data),
@@ -159,16 +159,16 @@ if __name__ == "__main__":
 
     # # Subplot usage example
     # fig, axes = plt.subplots(1, 2, figsize=(6, 2))
-    # plot(data, "upper left", ax=axes[0], fname=None)
-    # plot(data, "upper left", ax=axes[1], fname=None)
+    # plot_line(data, "upper left", ax=axes[0], fname=None)
+    # plot_line(data, "upper left", ax=axes[1], fname=None)
     # plt.tight_layout(pad=0.2)
     # plt.subplots_adjust(wspace=0.27)  # Add horizontal space between subplots
     # plt.savefig("results/subplots.pdf")
 
     # # Subplot usage example
     # fig, axes = plt.subplots(1, 2, figsize=(6, 2))
-    # plot(data, "upper left", ax=axes[0], fname=None)
-    # plot(data, "upper right", ax=axes[1], fname=None)
+    # plot_line(data, "upper left", ax=axes[0], fname=None)
+    # plot_line(data, "upper right", ax=axes[1], fname=None)
 
     # # Remove individual legends from subplots
     # axes[0].get_legend().remove()
