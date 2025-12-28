@@ -194,7 +194,7 @@ Configure global plot style settings with LaTeX rendering.
 
 ## License
 
-This project is available for use in academic and research projects.
+MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Contributing
 
