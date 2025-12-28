@@ -4,6 +4,14 @@ A simple plotting tool using matplotlib for generating publication-quality plots
 
 > **Note:** Currently, this package only supports line graphs with markers.
 
+## Examples
+
+### Single Plot
+<img src="examples/plot.png" width="400">
+
+### Subplots
+<img src="examples/subplot.png" width="500">
+
 ## Features
 
 - 📊 Easy-to-use API for creating academic plots
@@ -47,7 +55,9 @@ pip install -e .
 ### Basic Plot
 
 ```python
-from acadplot import plot_line
+from acadplot import plot_line, configure_plot_style
+
+configure_plot_style()
 
 # Define your data: (x_values, y_values, color, marker, label)
 data = [
@@ -67,11 +77,35 @@ plot_line(
 )
 ```
 
+### Custom Figure Size
+
+```python
+from acadplot import plot_line, configure_plot_style
+
+configure_plot_style()
+
+data = [
+    ([10, 20, 30, 40, 50], [5, 10, 15, 20, 25], "blue", "x_filled", "Method A"),
+    ([10, 20, 30, 40, 50], [6, 11, 14, 18, 22], "orange", "square", "Method B"),
+]
+
+# Create a larger plot
+plot_line(
+    data,
+    location="upper left",
+    fig_size=(5, 3),  # Custom figure size (width, height)
+    label=("X-axis Label", "Y-axis Label"),
+    fname="large_plot.pdf"
+)
+```
+
 ### Creating Subplots
 
 ```python
 import matplotlib.pyplot as plt
-from acadplot import plot_line
+from acadplot import plot_line, configure_plot_style
+
+configure_plot_style()
 
 data = [
     ([10, 20, 30, 40, 50], [5, 10, 15, 20, 25], "blue", "x_filled", "Method A"),
@@ -96,7 +130,9 @@ plt.savefig("subplots.pdf")
 
 ```python
 import matplotlib.pyplot as plt
-from acadplot import plot_line
+from acadplot import plot_line, configure_plot_style
+
+configure_plot_style()
 
 data = [
     ([10, 20, 30, 40, 50], [5, 10, 15, 20, 25], "blue", "x_filled", "Method A"),
@@ -164,11 +200,12 @@ markers = {
 
 ## API Reference
 
-### `plot_line(lines, location, label, ax, xticks, yticks, xstart, ystart, font_size, fname)`
+### `plot_line(lines, location, fig_size, label, ax, xticks, yticks, xstart, ystart, font_size, fname)`
 
-**Parameters:
+**Parameters:**
 - `lines` (List[Tuple]): List of lines to plot, each defined by `(x_values, y_values, color, marker, label)`
 - `location` (str): Location of the legend (e.g., "upper left", "lower right")
+- `fig_size` (Tuple[float, float]): Figure size (width, height) in inches. Default: `(3, 2)`
 - `label` (Tuple[str, str]): Labels for x and y axes. Default: `("x-label", "y-label")`
 - `ax` (Optional[plt.Axes]): Axes to plot on. Creates new if None
 - `xticks` (Optional[List[float] | range]): Custom x-axis ticks
@@ -190,6 +227,8 @@ Configure global plot style settings with LaTeX rendering.
 
 - `new_alpha(color, alpha)`: Create new color with specified alpha
 - `blend_color(rgba1, rgba2)`: Blend two RGBA colors
+- `colors`: Dictionary of pre-defined color names and hex values
+- `markers`: Dictionary of marker names and their matplotlib properties
 
 ## License
 

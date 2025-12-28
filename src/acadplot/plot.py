@@ -1,3 +1,4 @@
+import os
 from typing import List, Optional, Tuple
 
 import matplotlib.pyplot as plt
@@ -67,6 +68,7 @@ def draw(
 def plot_line(
     lines: List[Tuple[List[float], List[float], str | int, str | int, str]],
     location: str,
+    fig_size: Tuple[float, float] = (3, 2),
     label: Tuple[str, str] = ("x-label", "y-label"),
     ax=None,
     xticks: Optional[List[float] | range] = None,
@@ -81,6 +83,7 @@ def plot_line(
     Args:
         lines (List[Tuple[List[float], List[float], str | int, str | int, str]]): List of lines to plot, each defined by x values, y values, color name or index, marker name or index, and label.
         location (str): Location of the legend.
+        fig_size (Tuple[float, float], optional): Figure size. Defaults to (3, 2).
         label (Tuple[str, str], optional): Labels for the x and y axes. Defaults to ("x-label", "y-label").
         ax (Optional[plt.Axes], optional): Axes to plot on. Creates new if None. Defaults to None.
         xticks (Optional[List[float] | range], optional): Custom x-axis ticks. Defaults to None.
@@ -91,7 +94,7 @@ def plot_line(
         fname (Optional[str], optional): Filename to save the plot. Defaults to "plot.pdf".
     """
     if ax is None:
-        plt.figure(figsize=(3, 2))
+        plt.figure(figsize=fig_size)
         ax = plt.gca()
 
     plt.rc("font", family="serif", size=font_size)
@@ -126,10 +129,12 @@ def plot_line(
 
     if fname:
         plt.tight_layout(pad=0.2)
-        plt.savefig(fname)
+        os.makedirs(os.path.dirname(fname), exist_ok=True)
+        plt.savefig(fname, dpi=300)
 
 
 if __name__ == "__main__":
+    configure_plot_style()
     data: List[Tuple[List[float], List[float], str | int, str | int, str]] = [
         ([10, 20, 30, 40, 50], [5, 10, 15, 20, 25], "blue", 8, "Method A"),
         (
@@ -148,22 +153,22 @@ if __name__ == "__main__":
         ),
     ]
 
-    # # Single plot usage (unchanged)
+    # Single plot usage (unchanged)
     plot_line(
         data,
         "upper left",
         ystart=min(min(y) for _, y, _, _, _ in data),
         yticks=range(0, 30, 5),
-        fname="results/plot.pdf",
+        fname="examples/plot.png",
     )
 
-    # # Subplot usage example
-    # fig, axes = plt.subplots(1, 2, figsize=(6, 2))
-    # plot_line(data, "upper left", ax=axes[0], fname=None)
-    # plot_line(data, "upper left", ax=axes[1], fname=None)
-    # plt.tight_layout(pad=0.2)
-    # plt.subplots_adjust(wspace=0.27)  # Add horizontal space between subplots
-    # plt.savefig("results/subplots.pdf")
+    # Subplot usage example
+    fig, axes = plt.subplots(1, 2, figsize=(6, 2))
+    plot_line(data, "upper left", ax=axes[0], yticks=range(0, 30, 5), fname=None)
+    plot_line(data, "upper left", ax=axes[1], yticks=range(0, 30, 5), fname=None)
+    plt.tight_layout(pad=0.2)
+    plt.subplots_adjust(wspace=0.27)  # Add horizontal space between subplots
+    plt.savefig("examples/subplot.png", dpi=300)
 
     # # Subplot usage example
     # fig, axes = plt.subplots(1, 2, figsize=(6, 2))
@@ -191,4 +196,4 @@ if __name__ == "__main__":
 
     # plt.tight_layout(pad=0.2)
     # plt.subplots_adjust(wspace=0.27)  # Add horizontal space between subplots
-    # plt.savefig("results/subplots.pdf", bbox_inches="tight")
+    # plt.savefig("examples/subplots.pdf", bbox_inches="tight")
