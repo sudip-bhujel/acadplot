@@ -1,0 +1,11 @@
+[project]
+name = "acadplot"
+version = "0.1.0"
+description = "A simple plotting tool using matplotlib for generating plots and subplots for research papers."
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = ["matplotlib>=3.10.8"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
