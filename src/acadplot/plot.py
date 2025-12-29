@@ -1,4 +1,5 @@
 import os
+from tkinter import font
 from typing import List, Optional, Tuple
 
 import matplotlib.pyplot as plt
@@ -106,16 +107,16 @@ def plot_line(
     for line in lines:
         draw(ax, line[0], line[1], line[2], line[3], line[4])
 
-    plt.rc("text", usetex=False)
+    # plt.rc("text", usetex=False)
     legend = ax.legend(
         loc=location,
-        prop=dict(size=font_size, family="DejaVu Serif"),
+        prop=dict(size=font_size, family="serif"),
         framealpha=0.6,
         # columnspacing=0.5,
         # ncols=2,
     )
     legend.get_frame().set_linewidth(0.2)
-    plt.rc("text", usetex=True)
+    # plt.rc("text", usetex=True)
 
     if xticks is not None:
         ax.set_xticks(xticks)
@@ -160,6 +161,7 @@ if __name__ == "__main__":
         ystart=min(min(y) for _, y, _, _, _ in data),
         yticks=range(0, 30, 5),
         fname="examples/plot.png",
+        font_size=8,
     )
 
     # Subplot usage example
