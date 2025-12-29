@@ -99,8 +99,8 @@ def plot_line(
 
     plt.rc("font", family="serif", size=font_size)
 
-    ax.set_xlabel(label[0])
-    ax.set_ylabel(label[1])
+    ax.set_xlabel(label[0], fontsize=font_size)
+    ax.set_ylabel(label[1], fontsize=font_size)
     ax.grid(color="#aaaaaa", dashes=[5, 5], linewidth=0.3)
 
     for line in lines:
