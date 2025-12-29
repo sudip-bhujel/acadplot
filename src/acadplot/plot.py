@@ -69,14 +69,14 @@ def draw(
 def plot_line(
     lines: List[Tuple[List[float], List[float], str | int, str | int, str]],
     location: str,
-    fig_size: Tuple[float, float] = (3, 2),
+    fig_size: Tuple[float, float] = (3.0, 2.0),
     label: Tuple[str, str] = ("x-label", "y-label"),
     ax=None,
     xticks: Optional[List[float] | range] = None,
     yticks: Optional[List[float] | range] = None,
     xstart: Optional[float] = None,
     ystart: Optional[float] = None,
-    font_size=6,
+    font_size=6.0,
     fname: Optional[str] = "plot.pdf",
 ):
     """Plot multiple lines with markers and a legend.
@@ -91,7 +91,7 @@ def plot_line(
         yticks (Optional[List[float] | range], optional): Custom y-axis ticks. Defaults to None.
         xstart (Optional[float], optional): Minimum x-axis value. Defaults to None.
         ystart (Optional[float], optional): Minimum y-axis value. Defaults to None.
-        font_size (int, optional): Font size for the plot. Defaults to 6.
+        font_size (float, optional): Font size for the plot. Defaults to 6.0.
         fname (Optional[str], optional): Filename to save the plot. Defaults to "plot.pdf".
     """
     if ax is None:
