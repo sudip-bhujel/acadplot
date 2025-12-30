@@ -45,6 +45,10 @@ markers = {
     "tri_left": ("3", 4),
     "tri_right": ("4", 4),
     "octagon": ("8", 4),
+    "heart": (r"$\heartsuit$", 6),
+    "club": (r"$\clubsuit$", 6),
+    "spade": (r"$\spadesuit$", 6),
+    "diamond_suit": (r"$\diamondsuit$", 6),
     "none": ("", 0),
 }
 
