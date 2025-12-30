@@ -123,6 +123,8 @@ def plot_line(
     if yticks is not None:
         ax.set_yticks(yticks)
 
+    ax.tick_params(axis="both", labelsize=font_size)
+
     if xstart is not None:
         ax.set_xlim(left=xstart)
     if ystart is not None:
