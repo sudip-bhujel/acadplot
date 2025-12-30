@@ -78,6 +78,7 @@ def plot_line(
     ystart: Optional[float] = None,
     font_size=6.0,
     ncols: int = 1,
+    columnspacing: float = 0.5,
     fname: Optional[str] = "plot.pdf",
 ):
     """Plot multiple lines with markers and a legend.
@@ -94,6 +95,7 @@ def plot_line(
         ystart (Optional[float], optional): Minimum y-axis value. Defaults to None.
         font_size (float, optional): Font size for the plot. Defaults to 6.0.
         ncols (int, optional): Number of columns in the legend. Defaults to 1.
+        columnspacing (float, optional): Spacing between legend columns. Defaults to 0.5.
         fname (Optional[str], optional): Filename to save the plot. Defaults to "plot.pdf".
     """
     if ax is None:
@@ -115,6 +117,7 @@ def plot_line(
         prop=dict(size=font_size, family="serif"),
         framealpha=0.6,
         ncols=ncols,
+        columnspacing=columnspacing,
     )
     legend.get_frame().set_linewidth(0.2)
     # plt.rc("text", usetex=True)
