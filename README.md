@@ -2,14 +2,18 @@
 
 A simple plotting tool using matplotlib for generating publication-quality plots and subplots for research papers.
 
+> Download the Fantasque Sans Mono font from [here](https://github.com/belluzj/fantasque-sans).
+
 > **Note:** Currently, this package only supports line graphs with markers.
 
 ## Examples
 
 ### Single Plot
+
 <img src="examples/plot.png" width="400">
 
 ### Subplots
+
 <img src="examples/subplot.png" width="500">
 
 ## Features
@@ -203,6 +207,7 @@ markers = {
 ### `plot_line(lines, location, fig_size, label, ax, xticks, yticks, xstart, ystart, font_size, fname)`
 
 **Parameters:**
+
 - `lines` (List[Tuple]): List of lines to plot, each defined by `(x_values, y_values, color, marker, label)`
 - `location` (str): Location of the legend (e.g., "upper left", "lower right")
 - `fig_size` (Tuple[float, float]): Figure size (width, height) in inches. Default: `(3, 2)`
