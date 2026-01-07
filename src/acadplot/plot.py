@@ -112,16 +112,16 @@ def plot_line(
     for line in lines:
         draw(ax, line[0], line[1], line[2], line[3], line[4])
 
-    # plt.rc("text", usetex=False)
+    plt.rc("text", usetex=False)
     legend = ax.legend(
         loc=location,
-        prop=dict(size=font_size, family="serif"),
+        prop=dict(size=font_size, family="Monospace"),
         framealpha=0.6,
         ncols=ncols,
         columnspacing=columnspacing,
     )
     legend.get_frame().set_linewidth(0.2)
-    # plt.rc("text", usetex=True)
+    plt.rc("text", usetex=True)
 
     if xticks is not None:
         ax.set_xticks(xticks)
