@@ -20,6 +20,7 @@ def configure_plot_style():
     plt.rc("xtick.minor", width=0.3)
     plt.rc("ytick.major", width=0.5)
     plt.rc("ytick.minor", width=0.3)
+    plt.rc("font", family="serif")
 
 
 def draw(
