@@ -115,7 +115,7 @@ def plot_line(
     plt.rc("text", usetex=False)
     legend = ax.legend(
         loc=location,
-        prop=dict(size=font_size, family="Monospace"),
+        prop=dict(size=font_size, family="Fantasque Sans Mono"),
         framealpha=0.6,
         ncols=ncols,
         columnspacing=columnspacing,
