@@ -16,6 +16,7 @@ A simple plotting tool using matplotlib for generating publication-quality plots
 
 <img src="examples/subplot.png" width="500">
 
+
 ## Features
 
 - 📊 Easy-to-use API for creating academic plots
@@ -174,7 +175,65 @@ plt.subplots_adjust(wspace=0.27)
 plt.savefig("subplots_shared_legend.pdf", bbox_inches="tight")
 ```
 
-## Available Colors
+## Bar Plots
+
+Use the bar plotting functions to create single, grouped, or stacked bar charts.
+
+### Single Bar Plot
+
+```python
+from acadplot import plot_bar, configure_plot_style
+
+configure_plot_style()
+
+data = [
+    ([10, 20, 30, 40, 50], [5, 10, 15, 20, 25], "blue", "x_filled", "Method A"),
+    ([10, 20, 30, 40, 50], [6, 11, 14, 18, 22], "orange", "square", "Method B"),
+    ([10, 20, 30, 40, 50], [7, 9, 13, 19, 24], "green", "triangle_up", "Method C"),
+]
+
+plot_bar(
+    data,
+    location="upper left",
+    label=("X-axis Label", "Y-axis Label"),
+    ystart=0,
+    yticks=range(0, 30, 5),
+    fname="single_bar.pdf"
+)
+```
+
+### Grouped Bar Plot
+
+```python
+from acadplot import plot_grouped_bar, configure_plot_style
+
+configure_plot_style()
+
+plot_grouped_bar(
+    data,
+    location="upper left",
+    label=("X-axis Label", "Y-axis Label"),
+    ystart=0,
+    yticks=range(0, 30, 5),
+    fname="grouped_bar.pdf"
+)
+```
+
+### Stacked Bar Plot
+
+```python
+from acadplot import plot_stacked_bar, configure_plot_style
+
+configure_plot_style()
+
+plot_stacked_bar(
+    data,
+    location="upper left",
+    label=("X-axis Label", "Y-axis Label"),
+    ystart=0,
+    yticks=range(0, 30, 5),
+    fname="stacked_bar.pdf"
+)
 
 Use color names or indices (0-19):
 
@@ -200,6 +259,68 @@ markers = {
     "point", "pixel", "tri_down", "tri_up", "tri_left",
     "tri_right", "octagon", "none"
 }
+```
+
+
+## Bar Plots
+
+### Single Bar Plot
+```python
+from acadplot import plot_bar, configure_plot_style
+
+configure_plot_style()
+
+# Example: two groups, two conditions each
+groups = ["Group A", "Group B"]
+cond1 = [5, 7]   # values for condition 1
+cond2 = [3, 6]   # values for condition 2
+
+plot_bar(
+    [
+        (groups, cond1, "blue", "square", "Condition 1"),
+        (groups, cond2, "orange", "x_filled", "Condition 2")
+    ],
+    location="center",
+    fig_size=(4, 3),
+    label=("Groups", "Value"),
+    fname="grouped_bar.png"
+)
+```
+
+### Grouped Bar Plot
+```python
+from acadplot import plot_grouped_bar, configure_plot_style
+
+configure_plot_style()
+
+plot_grouped_bar(
+    [
+        (["Group A", "Group B"], [5, 7], "blue", "square", "Condition 1"),
+        (["Group A", "Group B"], [3, 6], "orange", "x_filled", "Condition 2")
+    ],
+    location="upper right",
+    fig_size=(4, 3),
+    label=("Groups", "Value"),
+    fname="grouped_bar.png"
+)
+```
+
+### Stacked Bar Plot
+```python
+from acadplot import plot_stacked_bar, configure_plot_style
+
+configure_plot_style()
+
+plot_stacked_bar(
+    [
+        (["Group A", "Group B"], [5, 7], "blue", "square", "Condition 1"),
+        (["Group A", "Group B"], [3, 6], "orange", "x_filled", "Condition 2")
+    ],
+    location="lower left",
+    fig_size=(4, 3),
+    label=("Groups", "Value"),
+    fname="stacked_bar.png"
+)
 ```
 
 ## API Reference

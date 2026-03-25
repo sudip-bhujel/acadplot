@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AcadPlot – Simple Publication‑Quality Plots</title>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+    h1, h2 { color: #0072B2; }
+    pre { background: #f5f5f5; padding: 1rem; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <h1>AcadPlot</h1>
+  <p>A thin wrapper around <code>matplotlib</code> that gives you publication‑ready line plots with minimal code.</p>
+
+  <h2>Overview</h2>
+  <p>A thin wrapper around <code>matplotlib</code> that provides a simple, declarative API for creating publication‑quality line plots. The library separates configuration, styling helpers, and drawing logic into two modules:
+<ul>
+<li><code>src/acadplot/plot.py</code> – defines <code>configure_plot_style</code>, the low‑level <code>draw</code> helper, and the high‑level <code>plot_line</code> function that iterates over a list of lines.</li>
+<li><code>src/acadplot/utils.py</code> – holds dictionaries of named colors and markers and utility functions <code>blend_color</code> and <code>new_alpha</code> used by <code>draw</code>.</li>
+</ul>
+These design choices make it easy to customize the appearance of all plots from a single place while keeping the drawing logic fast and testable.</p>
+
+  <h2>Why the separation?</h2>
+  <p>Keeping <code>plot.py</code> focused on figure layout and <code>utils.py</code> focused on data transformation and default palettes avoids tight coupling. This mirrors typical data‑visualization workflows where you first set a style (fonts, line widths, LaTeX), then map data to colors/markers, and finally draw.</p>
+
+  <h2>Customization Example</h2>
+  <pre><code>from acadplot import configure_plot_style, plot_line
+
+# Customize the global style (LaTeX rendering, larger fonts, thicker lines)
+configure_plot_style({
+    'font.family': 'serif',
+    'font.size': 12,
+    'axes.lw': 1.5,
+    'lines.linewidth': 2.0,
+    'grid.linestyle': '--',
+})
+
+# Prepare a list of line definitions.
+lines = [
+    ([0, 1, 2, 3, 4], [0, 1, 2, 3, 4], 'tab:blue', 'o', 'Linear'),
+    ([0, 1, 2, 3, 4], [0, 1.5, 3, 4.5, 6], 'tab:orange', 's', 'Quadratic'),
+]
+
+# Call plot_line; we can tweak legend position, y limits, etc.
+plot_line(
+    lines,
+    location='upper right',
+    ystart=0,
+    yticks=range(0, 7, 1),
+    fname='custom_example.pdf'
+)
+</code></pre>
+<p>In this example we:
+<ul>
+<li>Passed a dictionary to <code>configure_plot_style</code> to override individual matplotlib rc parameters.</li>
+<li>Defined each line as a tuple <code>(x, y, color_key, marker_key, label)</code> using keys from <code>colors</code> and <code>markers</code> in <code>utils.py</code>.</li>
+<li>Requested a different legend location and y‑axis range, showing how <code>plot_line</code>'s arguments can be used for fine‑grained control.</li>
+</ul></p>
+
+  <h2>Colors &amp; Markers</h2>
+  <p>See <code>src/acadplot/utils.py</code> for the full lists of available colors and markers.</p>
+
+  <h2>License</h2>
+  <p>MIT – see the <code>LICENSE</code> file.</p>
+</body>
+</html>
