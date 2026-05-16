@@ -4,64 +4,102 @@ from typing import List, Optional, Tuple
 import matplotlib.pyplot as plt
 
 from .draw import draw
-from .styles import configure_plot_style
+from .styles import (
+    apply_axis_style,
+    apply_grid,
+    apply_legend_style,
+    configure_plot_style,
+    get_current_style,
+)
+
+
+def _parse_line(line):
+    if len(line) == 5:
+        x, y, color_key, marker_key, line_label = line
+        return x, y, color_key, marker_key, line_label
+    if len(line) == 4:
+        x, y, marker_key, line_label = line
+        return x, y, None, marker_key, line_label
+    raise ValueError(
+        "Line entries must be (x, y, color, marker, label) or (x, y, marker, label)."
+    )
+
+
+def _save_figure(fig, fname: str) -> None:
+    fig.tight_layout(pad=0.2)
+    directory = os.path.dirname(fname)
+    if directory:
+        os.makedirs(directory, exist_ok=True)
+    fig.savefig(fname, dpi=300, bbox_inches="tight", pad_inches=0)
 
 
 def plot_line(
-    lines: List[Tuple[List[float], List[float], str | int, str | int, str]],
+    lines: List[Tuple],
     location: str,
-    fig_size: Tuple[float, float] = (3.0, 2.0),
+    fig_size: Optional[Tuple[float, float]] = None,
     label: Tuple[str, str] = ("x-label", "y-label"),
     ax=None,
     xticks: Optional[List[float] | range] = None,
     yticks: Optional[List[float] | range] = None,
     xstart: Optional[float] = None,
     ystart: Optional[float] = None,
-    font_size=6.0,
+    font_size: Optional[float] = None,
     ncols: int = 1,
     columnspacing: float = 0.5,
+    grid: Optional[str] = None,
     fname: Optional[str] = "plot.pdf",
 ):
     """Plot multiple lines with markers and a legend.
 
     Args:
-        lines (List[Tuple[List[float], List[float], str | int, str | int, str]]): List of lines to plot, each defined by x values, y values, color name or index, marker name or index, and label.
+        lines (List[Tuple]): List of lines to plot, each defined by
+            (x values, y values, color name/index, marker name/index, label)
+            or (x values, y values, marker name/index, label). Omit color to
+            use the active theme palette cycle.
         location (str): Location of the legend.
-        fig_size (Tuple[float, float], optional): Figure size. Defaults to (3, 2).
+        fig_size (Tuple[float, float], optional): Figure size. Defaults to the active style.
         label (Tuple[str, str], optional): Labels for the x and y axes. Defaults to ("x-label", "y-label").
         ax (Optional[plt.Axes], optional): Axes to plot on. Creates new if None. Defaults to None.
         xticks (Optional[List[float] | range], optional): Custom x-axis ticks. Defaults to None.
         yticks (Optional[List[float] | range], optional): Custom y-axis ticks. Defaults to None.
         xstart (Optional[float], optional): Minimum x-axis value. Defaults to None.
         ystart (Optional[float], optional): Minimum y-axis value. Defaults to None.
-        font_size (float, optional): Font size for the plot. Defaults to 6.0.
+        font_size (float, optional): Font size for the plot. Defaults to the active style.
         ncols (int, optional): Number of columns in the legend. Defaults to 1.
         columnspacing (float, optional): Spacing between legend columns. Defaults to 0.5.
+        grid (str, optional): Grid preset: "major-y", "major", "major-minor", or "none".
         fname (Optional[str], optional): Filename to save the plot. Defaults to "plot.pdf".
     """
+    style = get_current_style()
+    if fig_size is None:
+        fig_size = style["fig_size"]
+    if font_size is None:
+        font_size = float(style["font_size"])
+
     if ax is None:
-        plt.figure(figsize=fig_size)
-        ax = plt.gca()
+        fig, ax = plt.subplots(figsize=fig_size)
+    else:
+        fig = ax.figure
 
-    plt.rc("font", family="serif", size=font_size)
-
+    ax.set_prop_cycle(color=list(style["palette"]))
     ax.set_xlabel(label[0], fontsize=font_size)
     ax.set_ylabel(label[1], fontsize=font_size)
-    ax.grid(color="#aaaaaa", dashes=[5, 5], linewidth=0.3)
+    apply_grid(ax, grid or str(style["line_grid"]))
 
     for line in lines:
-        draw(ax, line[0], line[1], line[2], line[3], line[4])
+        draw(ax, *_parse_line(line))
 
-    plt.rc("text", usetex=False)
     legend = ax.legend(
         loc=location,
-        prop=dict(size=font_size, family="Fantasque Sans Mono"),
-        framealpha=0.6,
+        prop=dict(size=font_size, family=str(style["font_family"])),
+        frameon=bool(style["legend_frameon"]),
+        framealpha=float(style["legend_framealpha"]),
+        facecolor=str(style["legend_face_color"]),
+        edgecolor=str(style["legend_edge_color"]),
         ncols=ncols,
         columnspacing=columnspacing,
     )
-    legend.get_frame().set_linewidth(0.2)
-    plt.rc("text", usetex=True)
+    apply_legend_style(legend)
 
     if xticks is not None:
         ax.set_xticks(xticks)
@@ -69,6 +107,7 @@ def plot_line(
         ax.set_yticks(yticks)
 
     ax.tick_params(axis="both", labelsize=font_size)
+    apply_axis_style(ax)
 
     if xstart is not None:
         ax.set_xlim(left=xstart)
@@ -76,9 +115,9 @@ def plot_line(
         ax.set_ylim(bottom=ystart)
 
     if fname:
-        plt.tight_layout(pad=0.2)
-        os.makedirs(os.path.dirname(fname), exist_ok=True)
-        plt.savefig(fname, dpi=300)
+        _save_figure(fig, fname)
+
+    return fig, ax
 
 
 if __name__ == "__main__":
@@ -117,4 +156,4 @@ if __name__ == "__main__":
     plot_line(data, "upper left", ax=axes[1], yticks=range(0, 30, 5), fname=None)
     plt.tight_layout(pad=0.2)
     plt.subplots_adjust(wspace=0.27)  # Add horizontal space between subplots
-    plt.savefig("examples/subplot.png", dpi=300)
+    plt.savefig("examples/subplot.png", dpi=300, bbox_inches="tight", pad_inches=0)
