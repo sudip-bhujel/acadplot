@@ -6,8 +6,8 @@ from matplotlib.colors import to_rgba
 from matplotlib.patches import Patch
 
 from .draw import resolve_color_key
-from .styles import apply_axis_style, apply_grid, apply_legend_style, get_current_style
-from .utils import markers, new_alpha, save
+from .styles import apply_axis_style, apply_grid, get_current_style
+from .utils import markers, new_alpha, save, styled_legend
 
 
 def _prepare_axes(ax, fig_size):
@@ -83,21 +83,21 @@ def _parse_box_group(group):
 
 
 def _add_legend(
-    ax, location: str, legend_size: float, ncols: int, columnspacing: float
+    ax,
+    location: str,
+    legend_size: float,
+    ncols: int,
+    columnspacing: float,
+    legend_outside: bool | str,
 ):
-    style = get_current_style()
-    legend = ax.legend(
-        loc=location,
-        prop=dict(size=legend_size, family=str(style["font_family"])),
-        frameon=bool(style["legend_frameon"]),
-        framealpha=float(style["legend_framealpha"]),
-        facecolor=str(style["legend_face_color"]),
-        edgecolor=str(style["legend_edge_color"]),
+    return styled_legend(
+        ax,
+        location,
+        legend_size=legend_size,
         ncols=ncols,
         columnspacing=columnspacing,
+        legend_outside=legend_outside,
     )
-    apply_legend_style(legend)
-    return legend
 
 
 def plot_scatter(
@@ -115,6 +115,7 @@ def plot_scatter(
     columnspacing: float = 0.5,
     grid: Optional[str] = None,
     fname: Optional[str] = "scatter_plot.pdf",
+    legend_outside: bool | str = False,
 ):
     """Plot one or more scatter series."""
     style = get_current_style()
@@ -151,7 +152,7 @@ def plot_scatter(
             zorder=3,
         )
 
-    _add_legend(ax, location, legend_size, ncols, columnspacing)
+    _add_legend(ax, location, legend_size, ncols, columnspacing, legend_outside)
     ax.tick_params(axis="both", labelsize=tick_size)
     apply_axis_style(ax)
 
@@ -175,6 +176,7 @@ def plot_errorbar(
     columnspacing: float = 0.5,
     grid: Optional[str] = None,
     fname: Optional[str] = "errorbar_plot.pdf",
+    legend_outside: bool | str = False,
 ):
     """Plot line series with error bars."""
     style = get_current_style()
@@ -213,7 +215,7 @@ def plot_errorbar(
         line.set_markerfacecolor(new_alpha(to_rgba(resolved_color), 0.3))
         line.set_markeredgecolor(resolved_color)
 
-    _add_legend(ax, location, legend_size, ncols, columnspacing)
+    _add_legend(ax, location, legend_size, ncols, columnspacing, legend_outside)
     ax.tick_params(axis="both", labelsize=tick_size)
     apply_axis_style(ax)
 
@@ -234,6 +236,7 @@ def plot_box(
     location: Optional[str] = None,
     grid: Optional[str] = None,
     fname: Optional[str] = "box_plot.pdf",
+    legend_outside: bool | str = False,
 ):
     """Plot grouped distributions as a box plot."""
     style = get_current_style()
@@ -275,21 +278,18 @@ def plot_box(
             artist.set_linewidth(float(style["line_width"]))
             artist.set_color(str(style["axis_color"]))
 
-    if location is not None:
+    if location is not None or legend_outside:
         handles = [
             Patch(facecolor=new_alpha(to_rgba(c), 0.28), edgecolor=c) for c in colors
         ]
-        legend = ax.legend(
-            handles,
-            labels,
-            loc=location,
-            prop=dict(size=legend_size, family=str(style["font_family"])),
-            frameon=bool(style["legend_frameon"]),
-            framealpha=float(style["legend_framealpha"]),
-            facecolor=str(style["legend_face_color"]),
-            edgecolor=str(style["legend_edge_color"]),
+        styled_legend(
+            ax,
+            location or "best",
+            legend_size=legend_size,
+            legend_outside=legend_outside,
+            handles=handles,
+            labels=labels,
         )
-        apply_legend_style(legend)
 
     ax.tick_params(axis="both", labelsize=tick_size)
     apply_axis_style(ax)

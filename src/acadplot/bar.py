@@ -6,11 +6,10 @@ from .draw import draw_bar, resolve_color_key
 from .styles import (
     apply_axis_style,
     apply_grid,
-    apply_legend_style,
     configure_plot_style,
     get_current_style,
 )
-from .utils import save
+from .utils import save, styled_legend
 
 
 def _prepare_axes(ax, fig_size):
@@ -77,21 +76,21 @@ def _parse_stack(stack):
 
 
 def _add_legend(
-    ax, location: str, legend_size: float, ncols: int, columnspacing: float
+    ax,
+    location: str,
+    legend_size: float,
+    ncols: int,
+    columnspacing: float,
+    legend_outside: bool | str,
 ):
-    style = get_current_style()
-    legend = ax.legend(
-        loc=location,
-        prop=dict(size=legend_size, family=str(style["font_family"])),
-        frameon=bool(style["legend_frameon"]),
-        framealpha=float(style["legend_framealpha"]),
-        facecolor=str(style["legend_face_color"]),
-        edgecolor=str(style["legend_edge_color"]),
+    return styled_legend(
+        ax,
+        location,
+        legend_size=legend_size,
         ncols=ncols,
         columnspacing=columnspacing,
+        legend_outside=legend_outside,
     )
-    apply_legend_style(legend)
-    return legend
 
 
 def plot_bar(
@@ -111,6 +110,7 @@ def plot_bar(
     bar_width: float = 0.35,
     grid: Optional[str] = None,
     fname: Optional[str] = "bar_plot.pdf",
+    legend_outside: bool | str = False,
 ):
     """Plot a bar chart with a legend.
 
@@ -155,7 +155,7 @@ def plot_bar(
     for bar in bars:
         draw_bar(ax, *_parse_bar(bar), bar_width)
 
-    _add_legend(ax, location, legend_size, ncols, columnspacing)
+    _add_legend(ax, location, legend_size, ncols, columnspacing, legend_outside)
 
     if xticklabels is not None and bars:
         ax.set_xticks(bars[0][0])
@@ -186,6 +186,7 @@ def plot_grouped_bar(
     bar_width: float = 0.25,
     grid: Optional[str] = None,
     fname: Optional[str] = "grouped_bar_plot.pdf",
+    legend_outside: bool | str = False,
 ):
     """Plot a grouped bar chart with multiple bars per group.
 
@@ -240,7 +241,7 @@ def plot_grouped_bar(
     ax.set_xticks(list(group_positions))
     ax.set_xticklabels([g[0] for g in groups], rotation=rotation, fontsize=tick_size)
 
-    _add_legend(ax, location, legend_size, ncols, columnspacing)
+    _add_legend(ax, location, legend_size, ncols, columnspacing, legend_outside)
     ax.tick_params(axis="both", labelsize=tick_size)
     apply_axis_style(ax)
 
@@ -267,6 +268,7 @@ def plot_stacked_bar(
     bar_width: float = 0.35,
     grid: Optional[str] = None,
     fname: Optional[str] = "stacked_bar_plot.pdf",
+    legend_outside: bool | str = False,
 ):
     """Plot a stacked bar chart.
 
@@ -334,7 +336,7 @@ def plot_stacked_bar(
     ax.set_xticks(list(x_positions))
     ax.set_xticklabels(categories, rotation=rotation, fontsize=tick_size)
 
-    _add_legend(ax, location, legend_size, ncols, columnspacing)
+    _add_legend(ax, location, legend_size, ncols, columnspacing, legend_outside)
     ax.tick_params(axis="both", labelsize=tick_size)
     apply_axis_style(ax)
 

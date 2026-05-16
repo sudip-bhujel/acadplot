@@ -520,6 +520,17 @@ def available_fonts() -> tuple[str, ...]:
     return tuple(FONTS)
 
 
+def figure_size(layout: str | None = None) -> tuple[float, float]:
+    """Return the figure size for a layout, or for the active style."""
+    if layout is None:
+        return tuple(get_current_style()["fig_size"])
+    if layout not in LAYOUTS:
+        raise ValueError(
+            f"Unknown layout {layout!r}. Choose from: {', '.join(available_layouts())}."
+        )
+    return LAYOUTS[layout].fig_size
+
+
 def get_current_style() -> dict[str, object]:
     """Return a copy of the active AcadPlot style settings."""
     return deepcopy(_CURRENT_STYLE)
@@ -688,6 +699,53 @@ def apply_axis_style(ax) -> None:
     ax.tick_params(axis="both", colors=tick_color)
     for spine in ax.spines.values():
         spine.set_color(axis_color)
+
+
+def despine(ax=None, sides: tuple[str, ...] = ("top", "right")):
+    """Hide selected axes spines."""
+    if ax is None:
+        ax = plt.gca()
+    for side in sides:
+        ax.spines[side].set_visible(False)
+    return ax
+
+
+def format_axes(
+    ax=None,
+    *,
+    grid: GridPreset | None = None,
+    despine: bool | tuple[str, ...] = False,
+    label_size: float | None = None,
+    tick_size: float | None = None,
+    title_size: float | None = None,
+):
+    """Apply AcadPlot styling to a manually created Matplotlib axes."""
+    if ax is None:
+        ax = plt.gca()
+
+    style = get_current_style()
+    resolved_label_size = (
+        float(style["label_size"]) if label_size is None else float(label_size)
+    )
+    resolved_tick_size = (
+        float(style["tick_size"]) if tick_size is None else float(tick_size)
+    )
+    resolved_title_size = (
+        float(style["title_size"]) if title_size is None else float(title_size)
+    )
+
+    ax.xaxis.label.set_size(resolved_label_size)
+    ax.yaxis.label.set_size(resolved_label_size)
+    ax.title.set_size(resolved_title_size)
+    ax.tick_params(axis="both", labelsize=resolved_tick_size)
+    apply_axis_style(ax)
+
+    if grid is not None:
+        apply_grid(ax, grid)
+    if despine:
+        sides = ("top", "right") if despine is True else tuple(despine)
+        globals()["despine"](ax, sides=sides)
+    return ax
 
 
 def apply_legend_style(legend) -> None:

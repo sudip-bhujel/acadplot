@@ -3,6 +3,9 @@ from .styles import (
     available_layouts,
     available_themes,
     configure_plot_style,
+    despine,
+    figure_size,
+    format_axes,
     get_current_style,
     use_style,
 )
@@ -10,7 +13,20 @@ from .draw import draw, draw_bar
 from .line import plot_line
 from .bar import plot_bar, plot_grouped_bar, plot_stacked_bar
 from .charts import plot_box, plot_errorbar, plot_heatmap, plot_scatter
-from .utils import blend_color, colors, markers, new_alpha, save
+from .utils import (
+    annotate_points,
+    blend_color,
+    colors,
+    format_legend,
+    get_output_dir,
+    markers,
+    new_alpha,
+    panel_labels,
+    save,
+    save_all,
+    set_output_dir,
+    theme_preview,
+)
 
 __version__ = "0.1.0"
 __all__ = [
@@ -28,9 +44,19 @@ __all__ = [
     "available_fonts",
     "available_layouts",
     "available_themes",
+    "figure_size",
+    "format_axes",
+    "format_legend",
+    "despine",
     "get_current_style",
     "use_style",
     "save",
+    "save_all",
+    "set_output_dir",
+    "get_output_dir",
+    "panel_labels",
+    "annotate_points",
+    "theme_preview",
     "colors",
     "markers",
     "new_alpha",

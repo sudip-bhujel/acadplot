@@ -38,6 +38,8 @@ The committed examples use LaTeX Inconsolata; regeneration requires a TeX instal
 
 <img src="examples/heatmap.png" width="400">
 
+<img src="examples/utility_panel.png" width="500">
+
 ### Style Coverage
 
 The examples cover all built-in themes and layout profiles:
@@ -157,7 +159,7 @@ Plot functions save directly when `fname` is provided. For manual figures,
 subplots, or multi-format exports, use `save()`:
 
 ```python
-from acadplot import save
+from acadplot import save, save_all, set_output_dir
 
 save(fig, "figure", pdf=True, svg=True)
 ```
@@ -176,6 +178,51 @@ Useful options:
 - `formats=("pdf", "svg")`: choose formats explicitly
 - `close=False`: keep the figure open after saving
 - `dpi=600`: increase raster output resolution
+- `metadata=True`: write a small `.acadplot.json` reproducibility sidecar
+
+For project-wide figure output:
+
+```python
+set_output_dir("figures")
+save_all(fig, "model_comparison")  # PNG, PDF, and SVG
+```
+
+### Custom Matplotlib Figures
+
+AcadPlot can also style figures that you build manually:
+
+```python
+import matplotlib.pyplot as plt
+from acadplot import format_axes, format_legend, panel_labels, annotate_points, save
+
+fig, axes = plt.subplots(1, 2)
+axes[0].plot([1, 2, 3], [0.4, 0.6, 0.7])
+axes[1].scatter([1, 2, 3], [0.5, 0.55, 0.63])
+
+for ax in axes:
+    format_axes(ax, grid="major-y", despine=True)
+
+panel_labels(axes)
+annotate_points(axes[0], [(3, 0.7, "best")])
+format_legend(axes[0].legend())
+save(fig, "custom_panel.pdf")
+```
+
+Use `legend_outside` on built-in chart helpers when the plot area is crowded:
+
+```python
+plot_line(data, "upper left", legend_outside="right", fname="outside_legend.pdf")
+```
+
+To inspect style choices:
+
+```python
+from acadplot import figure_size, theme_preview
+
+print(figure_size("paper-2col"))
+fig, _ = theme_preview()
+save(fig, "theme_preview.pdf")
+```
 
 Available layouts:
 
@@ -578,12 +625,22 @@ Helper APIs:
 - `available_fonts()`: Return supported font preset names
 - `available_layouts()`: Return supported layout profile names
 - `available_themes()`: Return supported theme names
+- `figure_size(layout=None)`: Return the active or named layout figure size
 - `get_current_style()`: Return the active style settings
 - `use_style(...)`: Temporarily apply a style inside a `with` block
 
 ### Utility Functions
 
 - `save(fig, name, ...)`: Save figures with tight publication defaults and optional PNG/PDF/SVG multi-format output
+- `save_all(fig, name, ...)`: Save PNG, PDF, and SVG outputs
+- `set_output_dir(path)`: Set a default directory for relative save paths
+- `get_output_dir()`: Return the active default output directory
+- `format_axes(ax, ...)`: Apply AcadPlot style to custom Matplotlib axes
+- `format_legend(legend=None)`: Apply AcadPlot style to an existing legend
+- `despine(ax, ...)`: Hide selected axes spines
+- `panel_labels(axes, ...)`: Add `(a)`, `(b)`, `(c)` labels to panels
+- `annotate_points(ax, points, ...)`: Label selected points with styled annotations
+- `theme_preview()`: Generate a compact preview of theme palettes
 - `new_alpha(color, alpha)`: Create new color with specified alpha
 - `blend_color(rgba1, rgba2)`: Blend two RGBA colors
 - `colors`: Dictionary of pre-defined color names and hex values

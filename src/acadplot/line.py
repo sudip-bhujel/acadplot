@@ -6,11 +6,10 @@ from .draw import draw
 from .styles import (
     apply_axis_style,
     apply_grid,
-    apply_legend_style,
     configure_plot_style,
     get_current_style,
 )
-from .utils import save
+from .utils import save, styled_legend
 
 
 def _parse_line(line):
@@ -68,6 +67,7 @@ def plot_line(
     columnspacing: float = 0.5,
     grid: Optional[str] = None,
     fname: Optional[str] = "plot.pdf",
+    legend_outside: bool | str = False,
 ):
     """Plot multiple lines with markers and a legend.
 
@@ -117,17 +117,14 @@ def plot_line(
     for line in lines:
         draw(ax, *_parse_line(line))
 
-    legend = ax.legend(
-        loc=location,
-        prop=dict(size=legend_size, family=str(style["font_family"])),
-        frameon=bool(style["legend_frameon"]),
-        framealpha=float(style["legend_framealpha"]),
-        facecolor=str(style["legend_face_color"]),
-        edgecolor=str(style["legend_edge_color"]),
+    styled_legend(
+        ax,
+        location,
+        legend_size=legend_size,
         ncols=ncols,
         columnspacing=columnspacing,
+        legend_outside=legend_outside,
     )
-    apply_legend_style(legend)
 
     if xticks is not None:
         ax.set_xticks(xticks)

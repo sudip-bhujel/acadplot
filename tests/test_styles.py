@@ -10,8 +10,15 @@ from acadplot import (
     available_fonts,
     available_layouts,
     available_themes,
+    annotate_points,
     configure_plot_style,
+    despine,
+    figure_size,
+    format_axes,
+    format_legend,
+    get_output_dir,
     get_current_style,
+    panel_labels,
     plot_bar,
     plot_box,
     plot_errorbar,
@@ -21,6 +28,9 @@ from acadplot import (
     plot_scatter,
     plot_stacked_bar,
     save,
+    save_all,
+    set_output_dir,
+    theme_preview,
     use_style,
 )
 
@@ -54,6 +64,7 @@ def test_layout_profiles_have_different_defaults():
     assert one_col["font_size"] < two_col["font_size"]
     assert span["font_size"] < two_col["font_size"]
     assert one_col["line_width"] < two_col["line_width"]
+    assert figure_size("paper-2col") == two_col["fig_size"]
 
 
 def test_inconsolata_default_font_preset_updates_rcparams():
@@ -279,6 +290,80 @@ def test_save_utility_formats_are_explicit():
             Path(tmp) / "figure.svg",
         )
         assert not (Path(tmp) / "figure.png").exists()
+
+
+def test_output_dir_and_save_all():
+    previous = get_output_dir()
+    fig, _ = plt.subplots()
+
+    with TemporaryDirectory() as tmp:
+        try:
+            set_output_dir(tmp)
+            saved = save_all(fig, "figure")
+
+            assert get_output_dir() == Path(tmp)
+            assert saved == (
+                Path(tmp) / "figure.png",
+                Path(tmp) / "figure.pdf",
+                Path(tmp) / "figure.svg",
+            )
+            assert all(path.exists() for path in saved)
+        finally:
+            set_output_dir(previous)
+
+
+def test_save_metadata_sidecar():
+    configure_plot_style(layout="paper-1col", theme="classic", latex=False)
+    fig, _ = plt.subplots()
+
+    with TemporaryDirectory() as tmp:
+        saved = save(fig, Path(tmp) / "figure.pdf", metadata=True)
+        metadata_path = saved[0].with_suffix(".acadplot.json")
+
+        assert metadata_path.exists()
+        assert '"outputs"' in metadata_path.read_text(encoding="utf-8")
+
+
+def test_format_axes_despine_panel_labels_and_annotations():
+    configure_plot_style(layout="paper-1col", theme="classic", latex=False)
+    fig, axes = plt.subplots(1, 2)
+    axes[0].plot([0, 1], [1, 2])
+
+    format_axes(axes[0], grid="major-y", despine=True)
+    despine(axes[1])
+    legend = axes[0].legend(["line"])
+    format_legend(legend)
+    labels = panel_labels(axes)
+    annotations = annotate_points(axes[0], [(1, 2, "peak")])
+
+    assert not axes[0].spines["top"].get_visible()
+    assert not axes[0].spines["right"].get_visible()
+    assert not axes[1].spines["top"].get_visible()
+    assert [text.get_text() for text in labels] == ["(a)", "(b)"]
+    assert annotations[0].get_text() == "peak"
+    assert legend.get_texts()[0].get_color() == get_current_style()["legend_text_color"]
+    plt.close(fig)
+
+
+def test_theme_preview_smoke():
+    fig, ax = theme_preview(themes=("classic", "nature"))
+
+    assert len(ax.patches) > 0
+    plt.close(fig)
+
+
+def test_legend_outside_for_line_plot():
+    configure_plot_style(layout="paper-1col", theme="classic", latex=False)
+    fig, ax = plot_line(
+        [([0, 1], [1, 2], "circle", "A")],
+        "upper left",
+        legend_outside="right",
+        fname=None,
+    )
+
+    assert ax.get_legend() is not None
+    assert ax.get_legend()._loc == 6
+    plt.close(fig)
 
 
 def test_omitted_line_colors_use_active_theme_palette():

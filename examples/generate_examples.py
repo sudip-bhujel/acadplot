@@ -15,6 +15,10 @@ if str(SRC) not in sys.path:
 
 from acadplot import (  # noqa: E402
     configure_plot_style,
+    annotate_points,
+    format_axes,
+    format_legend,
+    panel_labels,
     plot_bar,
     plot_box,
     plot_errorbar,
@@ -242,6 +246,31 @@ def generate_heatmap_example() -> None:
     save_example(fig, "heatmap")
 
 
+def generate_utility_example() -> None:
+    configure_plot_style(layout="paper-2col-span", theme="classic", latex=True)
+    fig, axes = plt.subplots(1, 2, figsize=(6.8, 2.5))
+    x = [1, 2, 3, 4]
+    axes[0].plot(x, [0.52, 0.61, 0.68, 0.73], marker="o", label="Model")
+    axes[0].plot(x, [0.49, 0.55, 0.60, 0.64], marker="s", label="Baseline")
+    axes[1].scatter([0.12, 0.19, 0.27, 0.35], [0.44, 0.51, 0.59, 0.66], label="Lab A")
+    axes[1].scatter([0.15, 0.23, 0.30, 0.38], [0.41, 0.48, 0.55, 0.62], label="Lab B")
+
+    axes[0].set_xlabel("Epoch")
+    axes[0].set_ylabel("Score")
+    axes[1].set_xlabel("Signal")
+    axes[1].set_ylabel("Response")
+    for ax in axes:
+        format_axes(ax, grid="major-y", despine=True)
+
+    axes[0].legend(loc="lower right")
+    axes[1].legend(loc="center left", bbox_to_anchor=(1.02, 0.5))
+    format_legend(axes[0].get_legend())
+    format_legend(axes[1].get_legend())
+    panel_labels(axes)
+    annotate_points(axes[0], [(4, 0.73, "best")])
+    save_example(fig, "utility_panel")
+
+
 def generate_style_gallery() -> None:
     themes = ["classic", "nature", "colorblind", "mono", "warm"]
     fig, axes = plt.subplots(
@@ -275,6 +304,7 @@ def main() -> None:
     generate_errorbar_example()
     generate_box_example()
     generate_heatmap_example()
+    generate_utility_example()
     generate_style_gallery()
 
 
