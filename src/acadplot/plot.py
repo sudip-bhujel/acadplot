@@ -3,6 +3,7 @@ from .bar import plot_bar, plot_grouped_bar, plot_stacked_bar
 from .draw import draw, draw_bar
 from .line import plot_line
 from .styles import (
+    available_fonts,
     available_layouts,
     available_themes,
     configure_plot_style,
@@ -19,6 +20,7 @@ __all__ = [
     "draw",
     "draw_bar",
     "configure_plot_style",
+    "available_fonts",
     "available_layouts",
     "available_themes",
     "get_current_style",

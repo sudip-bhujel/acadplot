@@ -40,7 +40,7 @@ def save(fig, name: str, *, pdf: bool = False) -> None:
 
 def generate_line_example() -> None:
     configure_plot_style(
-        layout="paper-1col", theme="classic", font="libertine", latex=True
+        layout="paper-1col", theme="classic", latex=True
     )
     fig, _ = plot_line(
         LINE_DATA,
@@ -56,7 +56,7 @@ def generate_line_example() -> None:
 
 def generate_subplot_example() -> None:
     configure_plot_style(
-        layout="paper-2col", theme="colorblind", font="libertine", latex=True
+        layout="paper-2col-span", theme="colorblind", latex=True
     )
     fig, axes = plt.subplots(1, 2, figsize=(6.8, 2.5), sharey=True)
     plot_line(
@@ -85,7 +85,7 @@ def generate_subplot_example() -> None:
 
 def generate_bar_examples() -> None:
     configure_plot_style(
-        layout="paper-1col", theme="nature", font="libertine", latex=True
+        layout="paper-1col", theme="nature", latex=True
     )
     fig, _ = plot_bar(
         [
@@ -100,7 +100,7 @@ def generate_bar_examples() -> None:
     save(fig, "bar_plot")
 
     configure_plot_style(
-        layout="paper-2col", theme="colorblind", font="libertine", latex=True
+        layout="paper-2col", theme="colorblind", latex=True
     )
     fig, _ = plot_grouped_bar(
         [
@@ -115,7 +115,7 @@ def generate_bar_examples() -> None:
     save(fig, "grouped_bar_plot")
 
     configure_plot_style(
-        layout="paper-1col", theme="mono", font="libertine", latex=True
+        layout="paper-1col", theme="mono", latex=True
     )
     fig, _ = plot_stacked_bar(
         ["Ablation 1", "Ablation 2", "Ablation 3"],
@@ -134,7 +134,7 @@ def generate_bar_examples() -> None:
 
 def generate_presentation_example() -> None:
     configure_plot_style(
-        layout="presentation", theme="warm", font="libertine", latex=True
+        layout="presentation", theme="warm", latex=True
     )
     fig, _ = plot_line(
         [
@@ -153,7 +153,7 @@ def generate_presentation_example() -> None:
 
 def generate_monospace_example() -> None:
     configure_plot_style(
-        layout="paper-1col", theme="classic", font="inconsolata", latex=True
+        layout="paper-2col", theme="classic", latex=True
     )
     fig, _ = plot_line(
         [
@@ -178,7 +178,7 @@ def generate_style_gallery() -> None:
 
     for ax, theme in zip(axes, themes):
         configure_plot_style(
-            layout="paper-2col", theme=theme, font="libertine", latex=True
+            layout="paper-2col-span", theme=theme, latex=True
         )
         plot_line(
             LINE_DATA,

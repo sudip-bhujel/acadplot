@@ -1,4 +1,5 @@
 from .styles import (
+    available_fonts,
     available_layouts,
     available_themes,
     configure_plot_style,
@@ -19,6 +20,7 @@ __all__ = [
     "draw",
     "draw_bar",
     "configure_plot_style",
+    "available_fonts",
     "available_layouts",
     "available_themes",
     "get_current_style",

@@ -2,7 +2,7 @@
 
 A simple plotting tool using matplotlib for generating publication-quality plots and subplots for research papers.
 
-AcadPlot defaults to an academic Libertine-style setup with LaTeX rendering when available.
+AcadPlot defaults to an academic Inconsolata-style setup with LaTeX rendering when available.
 
 ## Examples
 
@@ -12,7 +12,7 @@ Regenerate every example from source with:
 uv run python examples/generate_examples.py
 ```
 
-The committed examples use LaTeX Libertine; regeneration requires a TeX installation with the `libertine` and `newtx` packages.
+The committed examples use LaTeX Inconsolata; regeneration requires a TeX installation with the `zi4` package.
 
 ### Core Figures
 
@@ -33,9 +33,10 @@ The committed examples use LaTeX Libertine; regeneration requires a TeX installa
 The examples cover all built-in themes and layout profiles:
 
 - `classic` with `paper-1col`: line plot
-- `classic` with `paper-1col` and `inconsolata`: monospace line plot
+- `classic` with `paper-2col`: compact monospace line plot
 - `nature` with `paper-1col`: bar plot
-- `colorblind` with `paper-2col`: subplot and grouped bar plots
+- `colorblind` with `paper-2col`: grouped bar plot for one column in a two-column paper
+- `colorblind` with `paper-2col-span`: subplot across both columns
 - `mono` with `paper-1col`: stacked bar plot
 - `warm` with `presentation`: presentation-scale line plot
 
@@ -94,13 +95,48 @@ Declare the figure style once near the top of your script, then call plotting fu
 ```python
 from acadplot import configure_plot_style
 
-configure_plot_style(layout="paper-1col", theme="classic", font="libertine")
+configure_plot_style(layout="paper-1col", theme="classic")
 ```
 
-Use `font="inconsolata"` for a polished monospace academic style:
+Override the layout font size when a paper template or reviewer copy needs it:
 
 ```python
-configure_plot_style(layout="paper-1col", theme="classic", font="inconsolata")
+configure_plot_style(
+    layout="paper-2col",
+    theme="classic",
+    font_size=10.5,
+)
+```
+
+Use separate font sizes when labels, ticks, legends, or titles need different treatment:
+
+```python
+configure_plot_style(
+    layout="paper-2col",
+    label_size=10.5,
+    tick_size=8.5,
+    legend_size=8.5,
+    title_size=11,
+)
+```
+
+Scale an entire style when the figure needs to be uniformly stronger:
+
+```python
+configure_plot_style(layout="paper-2col", scale=1.1)
+```
+
+Layout meaning:
+
+- `paper-1col`: full-width figure for a single-column paper.
+- `paper-2col`: one-column figure inside a two-column paper; narrower, with the largest paper font and heavier marks because it is visually reduced on the page.
+- `paper-2col-span`: figure spanning both columns in a two-column paper.
+- `presentation`: larger screen/projector figures.
+
+Use `font="libertine"` when a serif academic style is preferred:
+
+```python
+configure_plot_style(layout="paper-2col", theme="classic", font="libertine")
 ```
 
 Available layouts:
@@ -109,7 +145,7 @@ Available layouts:
 from acadplot import available_layouts
 
 print(available_layouts())
-# ("paper-1col", "paper-2col", "presentation")
+# ("paper-1col", "paper-2col", "paper-2col-span", "presentation")
 ```
 
 Available professional themes:
@@ -119,6 +155,15 @@ from acadplot import available_themes
 
 print(available_themes())
 # ("classic", "nature", "colorblind", "mono", "warm")
+```
+
+Available fonts:
+
+```python
+from acadplot import available_fonts
+
+print(available_fonts())
+# ("libertine", "inconsolata", "serif", "sans")
 ```
 
 The default `classic` cycle uses a muted publication palette inspired by Paul
@@ -132,7 +177,19 @@ Use a temporary style override when needed:
 from acadplot import use_style
 
 with use_style(layout="paper-2col", theme="colorblind"):
-    plot_line(data, location="upper left", fname="wide_plot.pdf")
+    plot_line(data, location="upper left", fname="column_plot.pdf")
+```
+
+You can also override font size for one plot call:
+
+```python
+plot_line(data, location="upper left", font_size=10.5, fname="column_plot.pdf")
+```
+
+Use `latex="auto"` to use LaTeX only when the local TeX installation and required font package are available:
+
+```python
+configure_plot_style(layout="paper-2col", latex="auto")
 ```
 
 ### Basic Plot
@@ -140,7 +197,7 @@ with use_style(layout="paper-2col", theme="colorblind"):
 ```python
 from acadplot import plot_line, configure_plot_style
 
-configure_plot_style(layout="paper-1col", theme="classic", font="libertine")
+configure_plot_style(layout="paper-1col", theme="classic")
 
 # Define your data: (x_values, y_values, marker, label)
 # Colors are optional; omitted colors use the active professional theme palette.
@@ -383,16 +440,26 @@ markers = {
 
 Draw a single line with markers on the given axes.
 
-### `configure_plot_style(layout, theme, font, latex)`
+### `configure_plot_style(layout, theme, font, latex, font_size, label_size, tick_size, legend_size, title_size, scale)`
 
 Configure global plot style settings with LaTeX rendering. Layouts and themes are composable:
 
 ```python
-configure_plot_style(layout="paper-2col", theme="nature", font="libertine", latex=True)
+configure_plot_style(
+    layout="paper-2col-span",
+    theme="nature",
+    latex="auto",
+    font_size=9.5,
+    label_size=10,
+    tick_size=8.5,
+    legend_size=8.5,
+    scale=1.05,
+)
 ```
 
 Helper APIs:
 
+- `available_fonts()`: Return supported font preset names
 - `available_layouts()`: Return supported layout profile names
 - `available_themes()`: Return supported theme names
 - `get_current_style()`: Return the active style settings

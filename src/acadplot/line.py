@@ -33,6 +33,31 @@ def _save_figure(fig, fname: str) -> None:
     fig.savefig(fname, dpi=300, bbox_inches="tight", pad_inches=0)
 
 
+def _resolve_text_sizes(style, font_size, label_size, tick_size, legend_size):
+    font_size_override = font_size
+    if font_size is None:
+        font_size = float(style["font_size"])
+    if label_size is None:
+        label_size = (
+            font_size_override
+            if font_size_override is not None
+            else float(style["label_size"])
+        )
+    if tick_size is None:
+        tick_size = (
+            font_size_override
+            if font_size_override is not None
+            else float(style["tick_size"])
+        )
+    if legend_size is None:
+        legend_size = (
+            font_size_override
+            if font_size_override is not None
+            else float(style["legend_size"])
+        )
+    return font_size, label_size, tick_size, legend_size
+
+
 def plot_line(
     lines: List[Tuple],
     location: str,
@@ -44,6 +69,9 @@ def plot_line(
     xstart: Optional[float] = None,
     ystart: Optional[float] = None,
     font_size: Optional[float] = None,
+    label_size: Optional[float] = None,
+    tick_size: Optional[float] = None,
+    legend_size: Optional[float] = None,
     ncols: int = 1,
     columnspacing: float = 0.5,
     grid: Optional[str] = None,
@@ -64,7 +92,10 @@ def plot_line(
         yticks (Optional[List[float] | range], optional): Custom y-axis ticks. Defaults to None.
         xstart (Optional[float], optional): Minimum x-axis value. Defaults to None.
         ystart (Optional[float], optional): Minimum y-axis value. Defaults to None.
-        font_size (float, optional): Font size for the plot. Defaults to the active style.
+        font_size (float, optional): Base font size for labels, ticks, and legend. Defaults to the active style.
+        label_size (float, optional): Axis label size. Defaults to font_size or the active style.
+        tick_size (float, optional): Tick label size. Defaults to font_size or the active style.
+        legend_size (float, optional): Legend text size. Defaults to font_size or the active style.
         ncols (int, optional): Number of columns in the legend. Defaults to 1.
         columnspacing (float, optional): Spacing between legend columns. Defaults to 0.5.
         grid (str, optional): Grid preset: "major-y", "major", "major-minor", or "none".
@@ -73,8 +104,13 @@ def plot_line(
     style = get_current_style()
     if fig_size is None:
         fig_size = style["fig_size"]
-    if font_size is None:
-        font_size = float(style["font_size"])
+    font_size, label_size, tick_size, legend_size = _resolve_text_sizes(
+        style,
+        font_size,
+        label_size,
+        tick_size,
+        legend_size,
+    )
 
     if ax is None:
         fig, ax = plt.subplots(figsize=fig_size)
@@ -82,8 +118,8 @@ def plot_line(
         fig = ax.figure
 
     ax.set_prop_cycle(color=list(style["palette"]))
-    ax.set_xlabel(label[0], fontsize=font_size)
-    ax.set_ylabel(label[1], fontsize=font_size)
+    ax.set_xlabel(label[0], fontsize=label_size)
+    ax.set_ylabel(label[1], fontsize=label_size)
     apply_grid(ax, grid or str(style["line_grid"]))
 
     for line in lines:
@@ -91,7 +127,7 @@ def plot_line(
 
     legend = ax.legend(
         loc=location,
-        prop=dict(size=font_size, family=str(style["font_family"])),
+        prop=dict(size=legend_size, family=str(style["font_family"])),
         frameon=bool(style["legend_frameon"]),
         framealpha=float(style["legend_framealpha"]),
         facecolor=str(style["legend_face_color"]),
@@ -106,7 +142,7 @@ def plot_line(
     if yticks is not None:
         ax.set_yticks(yticks)
 
-    ax.tick_params(axis="both", labelsize=font_size)
+    ax.tick_params(axis="both", labelsize=tick_size)
     apply_axis_style(ax)
 
     if xstart is not None:

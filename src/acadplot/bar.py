@@ -27,6 +27,31 @@ def _save_figure(fig, fname: str) -> None:
     fig.savefig(fname, dpi=300, bbox_inches="tight", pad_inches=0)
 
 
+def _resolve_text_sizes(style, font_size, label_size, tick_size, legend_size):
+    font_size_override = font_size
+    if font_size is None:
+        font_size = float(style["font_size"])
+    if label_size is None:
+        label_size = (
+            font_size_override
+            if font_size_override is not None
+            else float(style["label_size"])
+        )
+    if tick_size is None:
+        tick_size = (
+            font_size_override
+            if font_size_override is not None
+            else float(style["tick_size"])
+        )
+    if legend_size is None:
+        legend_size = (
+            font_size_override
+            if font_size_override is not None
+            else float(style["legend_size"])
+        )
+    return font_size, label_size, tick_size, legend_size
+
+
 def _parse_bar(bar):
     if len(bar) == 4:
         x, y, color_key, bar_label = bar
@@ -59,11 +84,11 @@ def _parse_stack(stack):
     raise ValueError("Stack entries must be (values, color, label) or (values, label).")
 
 
-def _add_legend(ax, location: str, font_size: float, ncols: int, columnspacing: float):
+def _add_legend(ax, location: str, legend_size: float, ncols: int, columnspacing: float):
     style = get_current_style()
     legend = ax.legend(
         loc=location,
-        prop=dict(size=font_size, family=str(style["font_family"])),
+        prop=dict(size=legend_size, family=str(style["font_family"])),
         frameon=bool(style["legend_frameon"]),
         framealpha=float(style["legend_framealpha"]),
         facecolor=str(style["legend_face_color"]),
@@ -84,6 +109,9 @@ def plot_bar(
     xticklabels: Optional[List[str]] = None,
     rotation: float = 0.0,
     font_size: Optional[float] = None,
+    label_size: Optional[float] = None,
+    tick_size: Optional[float] = None,
+    legend_size: Optional[float] = None,
     ncols: int = 1,
     columnspacing: float = 0.5,
     bar_width: float = 0.35,
@@ -102,7 +130,10 @@ def plot_bar(
         ax (Optional[plt.Axes], optional): Axes to plot on. Creates new if None. Defaults to None.
         xticklabels (Optional[List[str]], optional): Labels for x-axis ticks. Defaults to None.
         rotation (float, optional): Rotation angle for x-tick labels. Defaults to 0.0.
-        font_size (float, optional): Font size for the plot. Defaults to the active style.
+        font_size (float, optional): Base font size for labels, ticks, and legend. Defaults to the active style.
+        label_size (float, optional): Axis label size. Defaults to font_size or the active style.
+        tick_size (float, optional): Tick label size. Defaults to font_size or the active style.
+        legend_size (float, optional): Legend text size. Defaults to font_size or the active style.
         ncols (int, optional): Number of columns in the legend. Defaults to 1.
         columnspacing (float, optional): Spacing between legend columns. Defaults to 0.5.
         bar_width (float, optional): Width of the bars. Defaults to 0.35.
@@ -112,26 +143,31 @@ def plot_bar(
     style = get_current_style()
     if fig_size is None:
         fig_size = style["fig_size"]
-    if font_size is None:
-        font_size = float(style["font_size"])
+    font_size, label_size, tick_size, legend_size = _resolve_text_sizes(
+        style,
+        font_size,
+        label_size,
+        tick_size,
+        legend_size,
+    )
 
     fig, ax = _prepare_axes(ax, fig_size)
 
     ax.set_prop_cycle(color=list(style["palette"]))
-    ax.set_xlabel(label[0], fontsize=font_size)
-    ax.set_ylabel(label[1], fontsize=font_size)
+    ax.set_xlabel(label[0], fontsize=label_size)
+    ax.set_ylabel(label[1], fontsize=label_size)
     apply_grid(ax, grid or str(style["bar_grid"]))
 
     for bar in bars:
         draw_bar(ax, *_parse_bar(bar), bar_width)
 
-    _add_legend(ax, location, font_size, ncols, columnspacing)
+    _add_legend(ax, location, legend_size, ncols, columnspacing)
 
     if xticklabels is not None and bars:
         ax.set_xticks(bars[0][0])
-        ax.set_xticklabels(xticklabels, rotation=rotation, fontsize=font_size)
+        ax.set_xticklabels(xticklabels, rotation=rotation, fontsize=tick_size)
 
-    ax.tick_params(axis="both", labelsize=font_size)
+    ax.tick_params(axis="both", labelsize=tick_size)
     apply_axis_style(ax)
 
     if fname:
@@ -148,6 +184,9 @@ def plot_grouped_bar(
     ax=None,
     rotation: float = 0.0,
     font_size: Optional[float] = None,
+    label_size: Optional[float] = None,
+    tick_size: Optional[float] = None,
+    legend_size: Optional[float] = None,
     ncols: int = 1,
     columnspacing: float = 0.5,
     bar_width: float = 0.25,
@@ -165,7 +204,10 @@ def plot_grouped_bar(
         label (Tuple[str, str], optional): Labels for the x and y axes. Defaults to ("x-label", "y-label").
         ax (Optional[plt.Axes], optional): Axes to plot on. Creates new if None. Defaults to None.
         rotation (float, optional): Rotation angle for x-tick labels. Defaults to 0.0.
-        font_size (float, optional): Font size for the plot. Defaults to the active style.
+        font_size (float, optional): Base font size for labels, ticks, and legend. Defaults to the active style.
+        label_size (float, optional): Axis label size. Defaults to font_size or the active style.
+        tick_size (float, optional): Tick label size. Defaults to font_size or the active style.
+        legend_size (float, optional): Legend text size. Defaults to font_size or the active style.
         ncols (int, optional): Number of columns in the legend. Defaults to 1.
         columnspacing (float, optional): Spacing between legend columns. Defaults to 0.5.
         bar_width (float, optional): Width of each bar. Defaults to 0.25.
@@ -175,14 +217,19 @@ def plot_grouped_bar(
     style = get_current_style()
     if fig_size is None:
         fig_size = style["fig_size"]
-    if font_size is None:
-        font_size = float(style["font_size"])
+    font_size, label_size, tick_size, legend_size = _resolve_text_sizes(
+        style,
+        font_size,
+        label_size,
+        tick_size,
+        legend_size,
+    )
 
     fig, ax = _prepare_axes(ax, fig_size)
 
     ax.set_prop_cycle(color=list(style["palette"]))
-    ax.set_xlabel(label[0], fontsize=font_size)
-    ax.set_ylabel(label[1], fontsize=font_size)
+    ax.set_xlabel(label[0], fontsize=label_size)
+    ax.set_ylabel(label[1], fontsize=label_size)
     apply_grid(ax, grid or str(style["bar_grid"]))
 
     n_bars = len(groups[0][1]) if groups else 0
@@ -197,10 +244,10 @@ def plot_grouped_bar(
         draw_bar(ax, positions, values, color_key, bar_label, bar_width)
 
     ax.set_xticks(list(group_positions))
-    ax.set_xticklabels([g[0] for g in groups], rotation=rotation, fontsize=font_size)
+    ax.set_xticklabels([g[0] for g in groups], rotation=rotation, fontsize=tick_size)
 
-    _add_legend(ax, location, font_size, ncols, columnspacing)
-    ax.tick_params(axis="both", labelsize=font_size)
+    _add_legend(ax, location, legend_size, ncols, columnspacing)
+    ax.tick_params(axis="both", labelsize=tick_size)
     apply_axis_style(ax)
 
     if fname:
@@ -218,6 +265,9 @@ def plot_stacked_bar(
     ax=None,
     rotation: float = 0.0,
     font_size: Optional[float] = None,
+    label_size: Optional[float] = None,
+    tick_size: Optional[float] = None,
+    legend_size: Optional[float] = None,
     ncols: int = 1,
     columnspacing: float = 0.5,
     bar_width: float = 0.35,
@@ -236,7 +286,10 @@ def plot_stacked_bar(
         label (Tuple[str, str], optional): Labels for the x and y axes. Defaults to ("x-label", "y-label").
         ax (Optional[plt.Axes], optional): Axes to plot on. Creates new if None. Defaults to None.
         rotation (float, optional): Rotation angle for x-tick labels. Defaults to 0.0.
-        font_size (float, optional): Font size for the plot. Defaults to the active style.
+        font_size (float, optional): Base font size for labels, ticks, and legend. Defaults to the active style.
+        label_size (float, optional): Axis label size. Defaults to font_size or the active style.
+        tick_size (float, optional): Tick label size. Defaults to font_size or the active style.
+        legend_size (float, optional): Legend text size. Defaults to font_size or the active style.
         ncols (int, optional): Number of columns in the legend. Defaults to 1.
         columnspacing (float, optional): Spacing between legend columns. Defaults to 0.5.
         bar_width (float, optional): Width of the bars. Defaults to 0.35.
@@ -246,14 +299,19 @@ def plot_stacked_bar(
     style = get_current_style()
     if fig_size is None:
         fig_size = style["fig_size"]
-    if font_size is None:
-        font_size = float(style["font_size"])
+    font_size, label_size, tick_size, legend_size = _resolve_text_sizes(
+        style,
+        font_size,
+        label_size,
+        tick_size,
+        legend_size,
+    )
 
     fig, ax = _prepare_axes(ax, fig_size)
 
     ax.set_prop_cycle(color=list(style["palette"]))
-    ax.set_xlabel(label[0], fontsize=font_size)
-    ax.set_ylabel(label[1], fontsize=font_size)
+    ax.set_xlabel(label[0], fontsize=label_size)
+    ax.set_ylabel(label[1], fontsize=label_size)
     apply_grid(ax, grid or str(style["bar_grid"]))
 
     x_positions = range(len(categories))
@@ -280,10 +338,10 @@ def plot_stacked_bar(
         bottoms = [bottom + value for bottom, value in zip(bottoms, values)]
 
     ax.set_xticks(list(x_positions))
-    ax.set_xticklabels(categories, rotation=rotation, fontsize=font_size)
+    ax.set_xticklabels(categories, rotation=rotation, fontsize=tick_size)
 
-    _add_legend(ax, location, font_size, ncols, columnspacing)
-    ax.tick_params(axis="both", labelsize=font_size)
+    _add_legend(ax, location, legend_size, ncols, columnspacing)
+    ax.tick_params(axis="both", labelsize=tick_size)
     apply_axis_style(ax)
 
     if fname:

@@ -3,12 +3,15 @@ from __future__ import annotations
 from contextlib import contextmanager
 from copy import deepcopy
 from dataclasses import dataclass
+import shutil
+import subprocess
 from typing import Iterator, Literal
 
 import matplotlib.pyplot as plt
 
 
 GridPreset = Literal["major-y", "major", "major-minor", "none"]
+LatexMode = bool | Literal["auto"]
 
 
 @dataclass(frozen=True)
@@ -55,27 +58,28 @@ class FontPreset:
     sans_serif: tuple[str, ...]
     monospace: tuple[str, ...]
     latex_preamble: str
+    latex_packages: tuple[str, ...]
 
 
 BASE_COLORS = {
-    # Based on Paul Tol's muted qualitative scheme, ordered for line/bar cycles.
-    "blue": "#332288",
-    "orange": "#DDCC77",
-    "green": "#117733",
-    "purple": "#AA4499",
+    # Muted, high-contrast academic colors. Yellow is explicit-only, not cycled.
+    "blue": "#2F3A8F",
+    "orange": "#A95F32",
+    "green": "#28745A",
+    "purple": "#7B3F76",
     "brown": "#937860",
-    "yellow": "#DDCC77",
-    "sky_blue": "#88CCEE",
-    "gray": "#888888",
-    "red": "#CC6677",
-    "pink": "#CC6677",
-    "teal": "#44AA99",
-    "olive": "#999933",
-    "navy": "#332288",
-    "maroon": "#882255",
-    "lime": "#117733",
-    "cyan": "#88CCEE",
-    "magenta": "#AA4499",
+    "yellow": "#B8A642",
+    "sky_blue": "#4F8EA8",
+    "gray": "#6B6B6B",
+    "red": "#B04A5A",
+    "pink": "#B56A8A",
+    "teal": "#3F7F7D",
+    "olive": "#536A3B",
+    "navy": "#25356F",
+    "maroon": "#8A3B57",
+    "lime": "#4F8A5B",
+    "cyan": "#4F8EA8",
+    "magenta": "#8A4D8F",
     "dark_gray": "#404040",
     "light_gray": "#D3D3D3",
 }
@@ -83,13 +87,13 @@ BASE_COLORS = {
 
 LAYOUTS = {
     "paper-1col": LayoutProfile(
-        fig_size=(3.35, 2.1),
-        font_size=7.0,
-        line_width=0.7,
-        marker_scale=0.9,
-        marker_edge_width=0.45,
+        fig_size=(5.5, 3.2),
+        font_size=7.5,
+        line_width=0.8,
+        marker_scale=1.0,
+        marker_edge_width=0.5,
         axes_linewidth=0.5,
-        major_tick_width=0.45,
+        major_tick_width=0.48,
         minor_tick_width=0.3,
         grid_linewidth=0.3,
         minor_grid_linewidth=0.2,
@@ -104,6 +108,27 @@ LAYOUTS = {
         bar_grid="major-y",
     ),
     "paper-2col": LayoutProfile(
+        fig_size=(3.35, 2.15),
+        font_size=9.2,
+        line_width=1.05,
+        marker_scale=1.22,
+        marker_edge_width=0.65,
+        axes_linewidth=0.65,
+        major_tick_width=0.6,
+        minor_tick_width=0.4,
+        grid_linewidth=0.36,
+        minor_grid_linewidth=0.24,
+        grid_alpha=0.24,
+        minor_grid_alpha=0.11,
+        bar_alpha=0.88,
+        bar_edge_width=0.32,
+        legend_frameon=True,
+        legend_framealpha=0.6,
+        legend_frame_linewidth=0.2,
+        line_grid="major",
+        bar_grid="major-y",
+    ),
+    "paper-2col-span": LayoutProfile(
         fig_size=(6.8, 2.8),
         font_size=8.0,
         line_width=0.9,
@@ -152,16 +177,16 @@ THEMES = {
     "classic": Theme(
         colors=BASE_COLORS,
         palette=(
-            "#332288",
-            "#DDCC77",
-            "#117733",
-            "#CC6677",
-            "#88CCEE",
-            "#882255",
-            "#44AA99",
-            "#999933",
-            "#AA4499",
-            "#888888",
+            "#2F3A8F",
+            "#28745A",
+            "#B04A5A",
+            "#4F8EA8",
+            "#7B3F76",
+            "#3F7F7D",
+            "#8A3B57",
+            "#A95F32",
+            "#536A3B",
+            "#6B6B6B",
         ),
         grid_color="#A9A9A9",
         axis_color="#3A3A3A",
@@ -174,27 +199,27 @@ THEMES = {
     ),
     "nature": Theme(
         colors={
-            "blue": "#6A408D",
-            "orange": "#77B5B6",
-            "green": "#7E7E7E",
-            "purple": "#9671BD",
+            "blue": "#5A4A8A",
+            "orange": "#6FA9AA",
+            "green": "#737A73",
+            "purple": "#8E6BB0",
             "brown": "#A67C52",
             "yellow": "#DDAA33",
-            "sky_blue": "#A6D5D6",
-            "gray": "#8A8A8A",
+            "sky_blue": "#8FC8C9",
+            "gray": "#7B7B7B",
             "red": "#B35850",
             "pink": "#C9A3D8",
-            "teal": "#378D94",
+            "teal": "#2F7F86",
             "olive": "#7B8D42",
-            "navy": "#50336F",
+            "navy": "#4A3A70",
             "maroon": "#7A3B46",
             "lime": "#8DB67B",
-            "cyan": "#9FD8DA",
-            "magenta": "#B681C4",
+            "cyan": "#8FC8C9",
+            "magenta": "#9D74B6",
             "dark_gray": "#4E4E4E",
             "light_gray": "#D9D9D9",
         },
-        palette=("#9671BD", "#77B5B6", "#7E7E7E", "#6A408D", "#378D94"),
+        palette=("#8E6BB0", "#2F7F86", "#737A73", "#5A4A8A", "#6FA9AA"),
         grid_color="#A5A5A5",
         axis_color="#3A3A3A",
         axis_label_color="#3F3F3F",
@@ -228,13 +253,13 @@ THEMES = {
         },
         palette=(
             "#0072B2",
-            "#E69F00",
+            "#D55E00",
             "#009E73",
             "#CC79A7",
-            "#D55E00",
             "#56B4E9",
-            "#F0E442",
+            "#8C3A3A",
             "#000000",
+            "#E69F00",
         ),
         grid_color="#A8A8A8",
         axis_color="#3A3A3A",
@@ -299,7 +324,7 @@ THEMES = {
             "dark_gray": "#4C4742",
             "light_gray": "#D8D0C8",
         },
-        palette=("#B55239", "#C8792A", "#D6A84F", "#6E8B3D", "#3A6EA5"),
+        palette=("#B55239", "#3A6EA5", "#6E8B3D", "#5F8A8B", "#875A7B"),
         grid_color="#B5ACA3",
         axis_color="#443E39",
         axis_label_color="#4A4540",
@@ -319,6 +344,7 @@ FONTS = {
         sans_serif=("DejaVu Sans",),
         monospace=("DejaVu Sans Mono", "Courier New", "Courier"),
         latex_preamble=r"\usepackage{libertine}\usepackage[libertine]{newtxmath}",
+        latex_packages=("libertine.sty", "newtxmath.sty"),
     ),
     "inconsolata": FontPreset(
         family="monospace",
@@ -326,6 +352,7 @@ FONTS = {
         sans_serif=("DejaVu Sans",),
         monospace=("Inconsolata", "DejaVu Sans Mono", "Courier New", "Courier"),
         latex_preamble=r"\usepackage[varqu]{zi4}",
+        latex_packages=("zi4.sty",),
     ),
     "serif": FontPreset(
         family="serif",
@@ -333,6 +360,7 @@ FONTS = {
         sans_serif=("DejaVu Sans",),
         monospace=("DejaVu Sans Mono", "Courier New", "Courier"),
         latex_preamble="",
+        latex_packages=(),
     ),
     "sans": FontPreset(
         family="sans-serif",
@@ -340,6 +368,7 @@ FONTS = {
         sans_serif=("DejaVu Sans", "Arial", "Helvetica"),
         monospace=("DejaVu Sans Mono", "Courier New", "Courier"),
         latex_preamble=r"\usepackage{sansmath}",
+        latex_packages=("sansmath.sty",),
     ),
 }
 
@@ -351,7 +380,13 @@ def _build_style(
     layout: str,
     theme: str,
     font: str,
-    latex: bool,
+    latex: LatexMode,
+    font_size: float | None = None,
+    label_size: float | None = None,
+    tick_size: float | None = None,
+    legend_size: float | None = None,
+    title_size: float | None = None,
+    scale: float = 1.0,
 ) -> dict[str, object]:
     if layout not in LAYOUTS:
         raise ValueError(
@@ -367,31 +402,54 @@ def _build_style(
     layout_profile = LAYOUTS[layout]
     theme_profile = THEMES[theme]
     font_profile = FONTS[font]
+    scale = float(scale)
+    if scale <= 0:
+        raise ValueError("scale must be a positive number.")
+    resolved_font_size = (
+        layout_profile.font_size if font_size is None else float(font_size)
+    ) * scale
+    if resolved_font_size <= 0:
+        raise ValueError("font_size must be a positive number.")
+    resolved_label_size = _resolve_size("label_size", label_size, resolved_font_size)
+    resolved_tick_size = _resolve_size("tick_size", tick_size, resolved_font_size)
+    resolved_legend_size = _resolve_size("legend_size", legend_size, resolved_font_size)
+    resolved_title_size = _resolve_size("title_size", title_size, resolved_font_size)
 
     return {
         "layout": layout,
         "theme": theme,
         "font": font,
-        "latex": latex,
+        "latex": _resolve_latex(latex, font),
+        "latex_requested": latex,
+        "scale": scale,
         "fig_size": layout_profile.fig_size,
-        "font_size": layout_profile.font_size,
+        "font_size": resolved_font_size,
+        "font_size_override": font_size,
+        "label_size": resolved_label_size,
+        "label_size_override": label_size,
+        "tick_size": resolved_tick_size,
+        "tick_size_override": tick_size,
+        "legend_size": resolved_legend_size,
+        "legend_size_override": legend_size,
+        "title_size": resolved_title_size,
+        "title_size_override": title_size,
         "font_family": font_profile.family,
-        "line_width": layout_profile.line_width,
-        "marker_scale": layout_profile.marker_scale,
-        "marker_edge_width": layout_profile.marker_edge_width,
-        "axes_linewidth": layout_profile.axes_linewidth,
-        "major_tick_width": layout_profile.major_tick_width,
-        "minor_tick_width": layout_profile.minor_tick_width,
+        "line_width": layout_profile.line_width * scale,
+        "marker_scale": layout_profile.marker_scale * scale,
+        "marker_edge_width": layout_profile.marker_edge_width * scale,
+        "axes_linewidth": layout_profile.axes_linewidth * scale,
+        "major_tick_width": layout_profile.major_tick_width * scale,
+        "minor_tick_width": layout_profile.minor_tick_width * scale,
         "grid_color": theme_profile.grid_color,
-        "grid_linewidth": layout_profile.grid_linewidth,
-        "minor_grid_linewidth": layout_profile.minor_grid_linewidth,
+        "grid_linewidth": layout_profile.grid_linewidth * scale,
+        "minor_grid_linewidth": layout_profile.minor_grid_linewidth * scale,
         "grid_alpha": layout_profile.grid_alpha,
         "minor_grid_alpha": layout_profile.minor_grid_alpha,
         "bar_alpha": layout_profile.bar_alpha,
-        "bar_edge_width": layout_profile.bar_edge_width,
+        "bar_edge_width": layout_profile.bar_edge_width * scale,
         "legend_frameon": layout_profile.legend_frameon,
         "legend_framealpha": layout_profile.legend_framealpha,
-        "legend_frame_linewidth": layout_profile.legend_frame_linewidth,
+        "legend_frame_linewidth": layout_profile.legend_frame_linewidth * scale,
         "line_grid": layout_profile.line_grid,
         "bar_grid": layout_profile.bar_grid,
         "colors": deepcopy(theme_profile.colors),
@@ -406,7 +464,45 @@ def _build_style(
     }
 
 
-_CURRENT_STYLE = _build_style("paper-1col", "classic", "libertine", True)
+def _resolve_size(name: str, size: float | None, default: float) -> float:
+    if size is None:
+        return default
+    resolved = float(size)
+    if resolved <= 0:
+        raise ValueError(f"{name} must be a positive number.")
+    return resolved
+
+
+def _resolve_latex(latex: LatexMode, font: str) -> bool:
+    if latex == "auto":
+        return _latex_available(font)
+    if isinstance(latex, bool):
+        return latex
+    raise ValueError("latex must be True, False, or 'auto'.")
+
+
+def _latex_available(font: str) -> bool:
+    if shutil.which("latex") is None:
+        return False
+    packages = FONTS[font].latex_packages
+    if not packages:
+        return True
+    if shutil.which("kpsewhich") is None:
+        return False
+    for package in packages:
+        result = subprocess.run(
+            ["kpsewhich", package],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=2,
+            check=False,
+        )
+        if result.returncode != 0:
+            return False
+    return True
+
+
+_CURRENT_STYLE = _build_style("paper-1col", "classic", "inconsolata", True)
 
 
 def available_layouts() -> tuple[str, ...]:
@@ -417,6 +513,11 @@ def available_layouts() -> tuple[str, ...]:
 def available_themes() -> tuple[str, ...]:
     """Return the names of available professional visual themes."""
     return tuple(THEMES)
+
+
+def available_fonts() -> tuple[str, ...]:
+    """Return the names of available font presets."""
+    return tuple(FONTS)
 
 
 def get_current_style() -> dict[str, object]:
@@ -447,25 +548,27 @@ def _apply_rcparams(style: dict[str, object]) -> None:
             "font.monospace": list(font.monospace),
             "font.size": float(style["font_size"]),
             "axes.linewidth": float(style["axes_linewidth"]),
-            "axes.labelsize": float(style["font_size"]),
+            "axes.labelsize": float(style["label_size"]),
+            "axes.titlesize": float(style["title_size"]),
             "axes.labelcolor": axis_label_color,
             "axes.edgecolor": axis_color,
             "axes.prop_cycle": plt.cycler(color=list(style["palette"])),
-            "xtick.labelsize": float(style["font_size"]),
-            "ytick.labelsize": float(style["font_size"]),
+            "xtick.labelsize": float(style["tick_size"]),
+            "ytick.labelsize": float(style["tick_size"]),
             "xtick.color": tick_color,
             "ytick.color": tick_color,
             "xtick.major.width": float(style["major_tick_width"]),
             "ytick.major.width": float(style["major_tick_width"]),
             "xtick.minor.width": float(style["minor_tick_width"]),
             "ytick.minor.width": float(style["minor_tick_width"]),
-            "legend.fontsize": float(style["font_size"]),
+            "legend.fontsize": float(style["legend_size"]),
             "legend.labelcolor": str(style["legend_text_color"]),
             "legend.facecolor": str(style["legend_face_color"]),
             "legend.edgecolor": str(style["legend_edge_color"]),
             "legend.frameon": bool(style["legend_frameon"]),
             "legend.framealpha": float(style["legend_framealpha"]),
             "figure.figsize": tuple(style["fig_size"]),
+            "figure.titlesize": float(style["title_size"]),
             "grid.color": str(style["grid_color"]),
             "grid.linewidth": float(style["grid_linewidth"]),
             "grid.alpha": float(style["grid_alpha"]),
@@ -485,8 +588,14 @@ def _apply_rcparams(style: dict[str, object]) -> None:
 def configure_plot_style(
     layout: str = "paper-1col",
     theme: str = "classic",
-    font: str = "libertine",
-    latex: bool = True,
+    font: str = "inconsolata",
+    latex: LatexMode = True,
+    font_size: float | None = None,
+    label_size: float | None = None,
+    tick_size: float | None = None,
+    legend_size: float | None = None,
+    title_size: float | None = None,
+    scale: float = 1.0,
 ) -> dict[str, object]:
     """
     Configure global AcadPlot style settings.
@@ -496,7 +605,18 @@ def configure_plot_style(
     """
     global _CURRENT_STYLE
 
-    _CURRENT_STYLE = _build_style(layout, theme, font, latex)
+    _CURRENT_STYLE = _build_style(
+        layout,
+        theme,
+        font,
+        latex,
+        font_size=font_size,
+        label_size=label_size,
+        tick_size=tick_size,
+        legend_size=legend_size,
+        title_size=title_size,
+        scale=scale,
+    )
     _apply_rcparams(_CURRENT_STYLE)
     _sync_public_colors(_CURRENT_STYLE)
     return get_current_style()
@@ -507,20 +627,48 @@ def use_style(
     layout: str | None = None,
     theme: str | None = None,
     font: str | None = None,
-    latex: bool | None = None,
+    latex: LatexMode | None = None,
+    font_size: float | None = None,
+    label_size: float | None = None,
+    tick_size: float | None = None,
+    legend_size: float | None = None,
+    title_size: float | None = None,
+    scale: float | None = None,
 ) -> Iterator[dict[str, object]]:
     """Temporarily apply an AcadPlot style inside a ``with`` block."""
     global _CURRENT_STYLE
 
     previous_style = get_current_style()
     previous_rcparams = plt.rcParams.copy()
+    resolved_font_size = (
+        previous_style["font_size_override"] if font_size is None else font_size
+    )
+    resolved_label_size = (
+        previous_style["label_size_override"] if label_size is None else label_size
+    )
+    resolved_tick_size = (
+        previous_style["tick_size_override"] if tick_size is None else tick_size
+    )
+    resolved_legend_size = (
+        previous_style["legend_size_override"] if legend_size is None else legend_size
+    )
+    resolved_title_size = (
+        previous_style["title_size_override"] if title_size is None else title_size
+    )
+    resolved_scale = float(previous_style["scale"]) if scale is None else scale
 
     try:
         yield configure_plot_style(
             layout=layout or str(previous_style["layout"]),
             theme=theme or str(previous_style["theme"]),
             font=font or str(previous_style["font"]),
-            latex=bool(previous_style["latex"]) if latex is None else latex,
+            latex=previous_style["latex_requested"] if latex is None else latex,
+            font_size=resolved_font_size,
+            label_size=resolved_label_size,
+            tick_size=resolved_tick_size,
+            legend_size=resolved_legend_size,
+            title_size=resolved_title_size,
+            scale=resolved_scale,
         )
     finally:
         _CURRENT_STYLE = previous_style
