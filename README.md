@@ -28,6 +28,16 @@ The committed examples use LaTeX Inconsolata; regeneration requires a TeX instal
 
 <img src="examples/stacked_bar_plot.png" width="400">
 
+### Additional Academic Figures
+
+<img src="examples/scatter_plot.png" width="400">
+
+<img src="examples/errorbar_plot.png" width="400">
+
+<img src="examples/box_plot.png" width="400">
+
+<img src="examples/heatmap.png" width="400">
+
 ### Style Coverage
 
 The examples cover all built-in themes and layout profiles:
@@ -55,6 +65,8 @@ The examples cover all built-in themes and layout profiles:
 - 🔷 Multiple marker styles for distinguishing data series
 - 📐 LaTeX support for mathematical notation
 - 🔧 Customizable plot elements (ticks, grids, legends)
+- 📈 Line, bar, scatter, error-bar, box, and heatmap chart helpers
+- 💾 Publication-safe `save()` utility for PNG, PDF, and SVG output
 - 📑 Support for both single plots and subplots
 
 ## Installation
@@ -138,6 +150,32 @@ Use `font="libertine"` when a serif academic style is preferred:
 ```python
 configure_plot_style(layout="paper-2col", theme="classic", font="libertine")
 ```
+
+### Saving Figures
+
+Plot functions save directly when `fname` is provided. For manual figures,
+subplots, or multi-format exports, use `save()`:
+
+```python
+from acadplot import save
+
+save(fig, "figure", pdf=True, svg=True)
+```
+
+This writes `figure.png`, `figure.pdf`, and `figure.svg` with
+`bbox_inches="tight"` and `pad_inches=0`. Pass a filename with an extension
+when you want one exact target:
+
+```python
+save(fig, "figures/model_comparison.pdf")
+```
+
+Useful options:
+
+- `directory="examples"`: write relative names into a directory
+- `formats=("pdf", "svg")`: choose formats explicitly
+- `close=False`: keep the figure open after saving
+- `dpi=600`: increase raster output resolution
 
 Available layouts:
 
@@ -245,7 +283,7 @@ plot_line(
 
 ```python
 import matplotlib.pyplot as plt
-from acadplot import plot_line, configure_plot_style
+from acadplot import plot_line, configure_plot_style, save
 
 configure_plot_style()
 
@@ -265,14 +303,14 @@ plot_line(data, "upper right", ax=axes[1], fname=None)
 # Adjust layout and save
 plt.tight_layout(pad=0.2)
 plt.subplots_adjust(wspace=0.27)
-plt.savefig("subplots.pdf", bbox_inches="tight", pad_inches=0)
+save(fig, "subplots.pdf")
 ```
 
 ### Subplots with Shared Legend
 
 ```python
 import matplotlib.pyplot as plt
-from acadplot import plot_line, configure_plot_style
+from acadplot import plot_line, configure_plot_style, save
 
 configure_plot_style()
 
@@ -309,7 +347,7 @@ fig.legend(
 
 plt.tight_layout(pad=0.2)
 plt.subplots_adjust(wspace=0.27)
-plt.savefig("subplots_shared_legend.pdf", bbox_inches="tight", pad_inches=0)
+save(fig, "subplots_shared_legend.pdf")
 ```
 
 ## Bar Plots
@@ -378,6 +416,84 @@ plot_stacked_bar(
     location="upper left",
     label=("X-axis Label", "Y-axis Label"),
     fname="stacked_bar.pdf"
+)
+```
+
+## Additional Academic Charts
+
+These helpers follow the same style model as line and bar plots. Omit colors,
+`fig_size`, and font-size arguments to use the active global style; pass explicit
+values when a figure needs local overrides.
+
+### Scatter Plot
+
+```python
+from acadplot import plot_scatter, configure_plot_style
+
+configure_plot_style(layout="paper-2col", theme="classic")
+
+plot_scatter(
+    [
+        ([1.0, 1.4, 1.8], [0.42, 0.45, 0.49], "circle", "Lab A"),
+        ([1.1, 1.6, 2.0], [0.38, 0.43, 0.47], "square", "Lab B"),
+    ],
+    location="upper left",
+    label=("Signal strength", "Response"),
+    fname="scatter.pdf",
+)
+```
+
+### Error Bar Plot
+
+```python
+from acadplot import plot_errorbar, configure_plot_style
+
+configure_plot_style(layout="paper-2col", theme="colorblind")
+
+plot_errorbar(
+    [
+        ([1, 2, 3], [82.1, 84.0, 85.2], [0.7, 0.6, 0.5], "circle", "Method A"),
+        ([1, 2, 3], [80.4, 82.5, 83.4], [0.8, 0.7, 0.6], "square", "Method B"),
+    ],
+    location="lower right",
+    label=("Data fraction", "Accuracy"),
+    fname="errorbar.pdf",
+)
+```
+
+### Box Plot
+
+```python
+from acadplot import plot_box, configure_plot_style
+
+configure_plot_style(layout="paper-2col", theme="nature")
+
+plot_box(
+    [
+        ([0.61, 0.65, 0.66, 0.70], "Baseline"),
+        ([0.68, 0.70, 0.73, 0.77], "Model A"),
+        ([0.71, 0.74, 0.76, 0.79], "Model B"),
+    ],
+    label=("Method", "F1 score"),
+    fname="box.pdf",
+)
+```
+
+### Heatmap
+
+```python
+from acadplot import plot_heatmap, configure_plot_style
+
+configure_plot_style(layout="paper-2col", theme="classic")
+
+plot_heatmap(
+    [[0.91, 0.06, 0.03], [0.08, 0.84, 0.08], [0.04, 0.10, 0.86]],
+    label=("Predicted", "True"),
+    xticklabels=["A", "B", "C"],
+    yticklabels=["A", "B", "C"],
+    colorbar_label="Share",
+    annotate=True,
+    fname="heatmap.pdf",
 )
 ```
 
@@ -467,6 +583,7 @@ Helper APIs:
 
 ### Utility Functions
 
+- `save(fig, name, ...)`: Save figures with tight publication defaults and optional PNG/PDF/SVG multi-format output
 - `new_alpha(color, alpha)`: Create new color with specified alpha
 - `blend_color(rgba1, rgba2)`: Blend two RGBA colors
 - `colors`: Dictionary of pre-defined color names and hex values

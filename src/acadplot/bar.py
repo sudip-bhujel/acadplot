@@ -1,4 +1,3 @@
-import os
 from typing import List, Optional, Tuple
 
 import matplotlib.pyplot as plt
@@ -11,20 +10,13 @@ from .styles import (
     configure_plot_style,
     get_current_style,
 )
+from .utils import save
 
 
 def _prepare_axes(ax, fig_size):
     if ax is None:
         return plt.subplots(figsize=fig_size)
     return ax.figure, ax
-
-
-def _save_figure(fig, fname: str) -> None:
-    fig.tight_layout(pad=0.2)
-    directory = os.path.dirname(fname)
-    if directory:
-        os.makedirs(directory, exist_ok=True)
-    fig.savefig(fname, dpi=300, bbox_inches="tight", pad_inches=0)
 
 
 def _resolve_text_sizes(style, font_size, label_size, tick_size, legend_size):
@@ -84,7 +76,9 @@ def _parse_stack(stack):
     raise ValueError("Stack entries must be (values, color, label) or (values, label).")
 
 
-def _add_legend(ax, location: str, legend_size: float, ncols: int, columnspacing: float):
+def _add_legend(
+    ax, location: str, legend_size: float, ncols: int, columnspacing: float
+):
     style = get_current_style()
     legend = ax.legend(
         loc=location,
@@ -171,7 +165,7 @@ def plot_bar(
     apply_axis_style(ax)
 
     if fname:
-        _save_figure(fig, fname)
+        save(fig, fname, close=False)
 
     return fig, ax
 
@@ -251,7 +245,7 @@ def plot_grouped_bar(
     apply_axis_style(ax)
 
     if fname:
-        _save_figure(fig, fname)
+        save(fig, fname, close=False)
 
     return fig, ax
 
@@ -345,7 +339,7 @@ def plot_stacked_bar(
     apply_axis_style(ax)
 
     if fname:
-        _save_figure(fig, fname)
+        save(fig, fname, close=False)
 
     return fig, ax
 

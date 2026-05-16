@@ -1,4 +1,7 @@
-from typing import Tuple
+from pathlib import Path
+from typing import Iterable, Tuple
+
+import matplotlib.pyplot as plt
 
 
 def blend_color(
@@ -17,6 +20,86 @@ def new_alpha(
     alpha: float,
 ) -> tuple[float, float, float, float]:
     return (c[0], c[1], c[2], alpha)
+
+
+def _normalize_formats(formats: Iterable[str]) -> tuple[str, ...]:
+    normalized = []
+    for fmt in formats:
+        clean = fmt.lower().lstrip(".")
+        if clean and clean not in normalized:
+            normalized.append(clean)
+    return tuple(normalized)
+
+
+def save(
+    fig,
+    name: str | Path,
+    *,
+    directory: str | Path | None = None,
+    formats: Iterable[str] | None = None,
+    png: bool = True,
+    pdf: bool = False,
+    svg: bool = False,
+    dpi: int | float = 300,
+    bbox_inches: str | None = "tight",
+    pad_inches: float = 0,
+    tight_layout: bool = True,
+    tight_pad: float = 0.2,
+    close: bool = True,
+    transparent: bool = False,
+    **savefig_kwargs,
+) -> tuple[Path, ...]:
+    """Save a figure with publication-oriented defaults.
+
+    If ``name`` has a file extension, that exact file is written. Otherwise the
+    requested formats are appended to ``name``. By default AcadPlot writes PNG
+    output and uses a tight bounding box with no padding.
+    """
+    path = Path(name)
+    if directory is not None and not path.is_absolute():
+        path = Path(directory) / path
+
+    if path.suffix:
+        targets = (path,)
+    else:
+        selected_formats = []
+        if formats is None:
+            if png:
+                selected_formats.append("png")
+            if pdf:
+                selected_formats.append("pdf")
+            if svg:
+                selected_formats.append("svg")
+        else:
+            selected_formats.extend(formats)
+            if pdf:
+                selected_formats.append("pdf")
+            if svg:
+                selected_formats.append("svg")
+
+        normalized_formats = _normalize_formats(selected_formats)
+        if not normalized_formats:
+            raise ValueError("At least one output format must be requested.")
+        targets = tuple(path.with_suffix(f".{fmt}") for fmt in normalized_formats)
+
+    if tight_layout:
+        fig.tight_layout(pad=tight_pad)
+
+    for target in targets:
+        target.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(
+            target,
+            dpi=dpi,
+            bbox_inches=bbox_inches,
+            pad_inches=pad_inches,
+            transparent=transparent,
+            **savefig_kwargs,
+        )
+
+    if close:
+        plt.close(fig)
+
+    return targets
 
 
 markers = {

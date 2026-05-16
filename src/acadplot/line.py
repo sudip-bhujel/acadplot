@@ -1,4 +1,3 @@
-import os
 from typing import List, Optional, Tuple
 
 import matplotlib.pyplot as plt
@@ -11,6 +10,7 @@ from .styles import (
     configure_plot_style,
     get_current_style,
 )
+from .utils import save
 
 
 def _parse_line(line):
@@ -23,14 +23,6 @@ def _parse_line(line):
     raise ValueError(
         "Line entries must be (x, y, color, marker, label) or (x, y, marker, label)."
     )
-
-
-def _save_figure(fig, fname: str) -> None:
-    fig.tight_layout(pad=0.2)
-    directory = os.path.dirname(fname)
-    if directory:
-        os.makedirs(directory, exist_ok=True)
-    fig.savefig(fname, dpi=300, bbox_inches="tight", pad_inches=0)
 
 
 def _resolve_text_sizes(style, font_size, label_size, tick_size, legend_size):
@@ -151,7 +143,7 @@ def plot_line(
         ax.set_ylim(bottom=ystart)
 
     if fname:
-        _save_figure(fig, fname)
+        save(fig, fname, close=False)
 
     return fig, ax
 
@@ -192,4 +184,4 @@ if __name__ == "__main__":
     plot_line(data, "upper left", ax=axes[1], yticks=range(0, 30, 5), fname=None)
     plt.tight_layout(pad=0.2)
     plt.subplots_adjust(wspace=0.27)  # Add horizontal space between subplots
-    plt.savefig("examples/subplot.png", dpi=300, bbox_inches="tight", pad_inches=0)
+    save(fig, "examples/subplot.png")

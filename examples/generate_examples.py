@@ -16,9 +16,14 @@ if str(SRC) not in sys.path:
 from acadplot import (  # noqa: E402
     configure_plot_style,
     plot_bar,
+    plot_box,
+    plot_errorbar,
     plot_grouped_bar,
+    plot_heatmap,
     plot_line,
+    plot_scatter,
     plot_stacked_bar,
+    save,
 )
 
 OUT = Path(__file__).resolve().parent
@@ -31,17 +36,12 @@ LINE_DATA = [
 ]
 
 
-def save(fig, name: str, *, pdf: bool = False) -> None:
-    fig.savefig(OUT / f"{name}.png", dpi=300, bbox_inches="tight", pad_inches=0)
-    if pdf:
-        fig.savefig(OUT / f"{name}.pdf", bbox_inches="tight", pad_inches=0)
-    plt.close(fig)
+def save_example(fig, name: str, *, pdf: bool = False) -> None:
+    save(fig, name, directory=OUT, pdf=pdf)
 
 
 def generate_line_example() -> None:
-    configure_plot_style(
-        layout="paper-1col", theme="classic", latex=True
-    )
+    configure_plot_style(layout="paper-1col", theme="classic", latex=True)
     fig, _ = plot_line(
         LINE_DATA,
         location="lower right",
@@ -51,13 +51,11 @@ def generate_line_example() -> None:
         ystart=71,
         fname=None,
     )
-    save(fig, "plot", pdf=True)
+    save_example(fig, "plot", pdf=True)
 
 
 def generate_subplot_example() -> None:
-    configure_plot_style(
-        layout="paper-2col-span", theme="colorblind", latex=True
-    )
+    configure_plot_style(layout="paper-2col-span", theme="colorblind", latex=True)
     fig, axes = plt.subplots(1, 2, figsize=(6.8, 2.5), sharey=True)
     plot_line(
         LINE_DATA[:2],
@@ -80,13 +78,11 @@ def generate_subplot_example() -> None:
     axes[0].set_title("Small data regime")
     axes[1].set_title("Large data regime")
     fig.tight_layout(pad=0.3, w_pad=1.5)
-    save(fig, "subplot", pdf=True)
+    save_example(fig, "subplot", pdf=True)
 
 
 def generate_bar_examples() -> None:
-    configure_plot_style(
-        layout="paper-1col", theme="nature", latex=True
-    )
+    configure_plot_style(layout="paper-1col", theme="nature", latex=True)
     fig, _ = plot_bar(
         [
             ([0, 1, 2], [81.2, 84.4, 86.1], "Baseline"),
@@ -97,11 +93,9 @@ def generate_bar_examples() -> None:
         xticklabels=["A", "B", "C"],
         fname=None,
     )
-    save(fig, "bar_plot")
+    save_example(fig, "bar_plot")
 
-    configure_plot_style(
-        layout="paper-2col", theme="colorblind", latex=True
-    )
+    configure_plot_style(layout="paper-2col", theme="colorblind", latex=True)
     fig, _ = plot_grouped_bar(
         [
             ("Dataset A", [(81.2, "Baseline"), (83.5, "AcadPlot")]),
@@ -112,11 +106,9 @@ def generate_bar_examples() -> None:
         label=("Dataset", "Score"),
         fname=None,
     )
-    save(fig, "grouped_bar_plot")
+    save_example(fig, "grouped_bar_plot")
 
-    configure_plot_style(
-        layout="paper-1col", theme="mono", latex=True
-    )
+    configure_plot_style(layout="paper-1col", theme="mono", latex=True)
     fig, _ = plot_stacked_bar(
         ["Ablation 1", "Ablation 2", "Ablation 3"],
         [
@@ -129,13 +121,11 @@ def generate_bar_examples() -> None:
         rotation=8,
         fname=None,
     )
-    save(fig, "stacked_bar_plot")
+    save_example(fig, "stacked_bar_plot")
 
 
 def generate_presentation_example() -> None:
-    configure_plot_style(
-        layout="presentation", theme="warm", latex=True
-    )
+    configure_plot_style(layout="presentation", theme="warm", latex=True)
     fig, _ = plot_line(
         [
             ([0, 1, 2, 3, 4], [54, 61, 67, 73, 79], "circle", "Model"),
@@ -148,13 +138,11 @@ def generate_presentation_example() -> None:
         grid="major-minor",
         fname=None,
     )
-    save(fig, "presentation_style")
+    save_example(fig, "presentation_style")
 
 
 def generate_monospace_example() -> None:
-    configure_plot_style(
-        layout="paper-2col", theme="classic", latex=True
-    )
+    configure_plot_style(layout="paper-2col", theme="classic", latex=True)
     fig, _ = plot_line(
         [
             ([1, 2, 3, 4, 5], [0.42, 0.55, 0.63, 0.68, 0.71], "circle", "Model"),
@@ -167,7 +155,91 @@ def generate_monospace_example() -> None:
         grid="major",
         fname=None,
     )
-    save(fig, "monospace_style", pdf=True)
+    save_example(fig, "monospace_style", pdf=True)
+
+
+def generate_scatter_example() -> None:
+    configure_plot_style(layout="paper-2col", theme="classic", latex=True)
+    fig, _ = plot_scatter(
+        [
+            (
+                [1.0, 1.4, 1.8, 2.2, 2.6],
+                [0.42, 0.45, 0.49, 0.53, 0.58],
+                "circle",
+                "Lab A",
+            ),
+            (
+                [1.1, 1.6, 2.0, 2.5, 2.9],
+                [0.38, 0.43, 0.47, 0.55, 0.61],
+                "square",
+                "Lab B",
+            ),
+        ],
+        location="upper left",
+        label=("Signal strength", "Response"),
+        grid="major",
+        fname=None,
+    )
+    save_example(fig, "scatter_plot")
+
+
+def generate_errorbar_example() -> None:
+    configure_plot_style(layout="paper-2col", theme="colorblind", latex=True)
+    fig, _ = plot_errorbar(
+        [
+            (
+                [1, 2, 3, 4],
+                [82.1, 84.0, 85.2, 86.1],
+                [0.7, 0.6, 0.5, 0.5],
+                "circle",
+                "Method A",
+            ),
+            (
+                [1, 2, 3, 4],
+                [80.4, 82.5, 83.4, 84.0],
+                [0.8, 0.7, 0.6, 0.6],
+                "square",
+                "Method B",
+            ),
+        ],
+        location="lower right",
+        label=("Data fraction", r"Accuracy (\%)"),
+        grid="major-y",
+        fname=None,
+    )
+    save_example(fig, "errorbar_plot")
+
+
+def generate_box_example() -> None:
+    configure_plot_style(layout="paper-2col", theme="nature", latex=True)
+    fig, _ = plot_box(
+        [
+            ([0.61, 0.65, 0.66, 0.67, 0.70, 0.72], "Baseline"),
+            ([0.68, 0.70, 0.72, 0.73, 0.75, 0.77], "Model A"),
+            ([0.71, 0.73, 0.74, 0.76, 0.78, 0.79], "Model B"),
+        ],
+        label=("Method", "F1 score"),
+        fname=None,
+    )
+    save_example(fig, "box_plot")
+
+
+def generate_heatmap_example() -> None:
+    configure_plot_style(layout="paper-2col", theme="classic", latex=True)
+    fig, _ = plot_heatmap(
+        [
+            [0.91, 0.06, 0.03],
+            [0.08, 0.84, 0.08],
+            [0.04, 0.10, 0.86],
+        ],
+        label=("Predicted", "True"),
+        xticklabels=["A", "B", "C"],
+        yticklabels=["A", "B", "C"],
+        colorbar_label="Share",
+        annotate=True,
+        fname=None,
+    )
+    save_example(fig, "heatmap")
 
 
 def generate_style_gallery() -> None:
@@ -177,9 +249,7 @@ def generate_style_gallery() -> None:
     )
 
     for ax, theme in zip(axes, themes):
-        configure_plot_style(
-            layout="paper-2col-span", theme=theme, latex=True
-        )
+        configure_plot_style(layout="paper-2col-span", theme=theme, latex=True)
         plot_line(
             LINE_DATA,
             "lower right",
@@ -192,7 +262,7 @@ def generate_style_gallery() -> None:
         ax.set_title(theme)
 
     fig.tight_layout(pad=0.4, h_pad=0.9)
-    save(fig, "style_gallery")
+    save_example(fig, "style_gallery")
 
 
 def main() -> None:
@@ -201,6 +271,10 @@ def main() -> None:
     generate_bar_examples()
     generate_presentation_example()
     generate_monospace_example()
+    generate_scatter_example()
+    generate_errorbar_example()
+    generate_box_example()
+    generate_heatmap_example()
     generate_style_gallery()
 
 

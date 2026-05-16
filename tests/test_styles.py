@@ -13,9 +13,14 @@ from acadplot import (
     configure_plot_style,
     get_current_style,
     plot_bar,
+    plot_box,
+    plot_errorbar,
     plot_grouped_bar,
+    plot_heatmap,
     plot_line,
+    plot_scatter,
     plot_stacked_bar,
+    save,
     use_style,
 )
 
@@ -237,6 +242,45 @@ def test_default_save_uses_tight_bbox_without_padding():
     assert captured["pad_inches"] == 0
 
 
+def test_save_utility_writes_multiple_formats_and_closes():
+    fig, _ = plt.subplots()
+
+    with TemporaryDirectory() as tmp:
+        saved = save(fig, "figure", directory=tmp, pdf=True, svg=True)
+
+        assert saved == (
+            Path(tmp) / "figure.png",
+            Path(tmp) / "figure.pdf",
+            Path(tmp) / "figure.svg",
+        )
+        assert all(path.exists() for path in saved)
+        assert not plt.fignum_exists(fig.number)
+
+
+def test_save_utility_respects_explicit_suffix():
+    fig, _ = plt.subplots()
+
+    with TemporaryDirectory() as tmp:
+        target = Path(tmp) / "exact.pdf"
+        saved = save(fig, target, png=False)
+
+        assert saved == (target,)
+        assert target.exists()
+
+
+def test_save_utility_formats_are_explicit():
+    fig, _ = plt.subplots()
+
+    with TemporaryDirectory() as tmp:
+        saved = save(fig, "figure", directory=tmp, formats=("pdf", "svg"))
+
+        assert saved == (
+            Path(tmp) / "figure.pdf",
+            Path(tmp) / "figure.svg",
+        )
+        assert not (Path(tmp) / "figure.png").exists()
+
+
 def test_omitted_line_colors_use_active_theme_palette():
     style = configure_plot_style(layout="paper-1col", theme="classic", latex=False)
     fig, ax = plot_line(
@@ -308,6 +352,31 @@ def test_plot_smoke_and_vector_exports():
             stacked_categories,
             stacked_data,
             "upper left",
+            fname=None,
+        )
+        plt.close(fig)
+        fig, _ = plot_scatter(
+            [([0, 1, 2], [1, 2, 3], "circle", "A")],
+            "upper left",
+            fname=None,
+        )
+        plt.close(fig)
+        fig, _ = plot_errorbar(
+            [([0, 1, 2], [1, 2, 3], [0.1, 0.2, 0.1], "circle", "A")],
+            "upper left",
+            fname=None,
+        )
+        plt.close(fig)
+        fig, _ = plot_box(
+            [([1, 2, 3], "A"), ([2, 3, 4], "B")],
+            fname=None,
+        )
+        plt.close(fig)
+        fig, _ = plot_heatmap(
+            [[1, 0], [0, 1]],
+            xticklabels=["A", "B"],
+            yticklabels=["A", "B"],
+            annotate=True,
             fname=None,
         )
         plt.close(fig)
