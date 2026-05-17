@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from acadplot import (
     available_fonts,
     available_layouts,
+    available_text_colors,
     available_themes,
     annotate_points,
     configure_plot_style,
@@ -52,6 +53,8 @@ def test_configure_plot_style_updates_rcparams():
     assert "paper-1col" in available_layouts()
     assert "classic" in available_themes()
     assert "inconsolata" in available_fonts()
+    assert "dark" in available_text_colors()
+    assert "gray" in available_text_colors()
 
 
 def test_layout_profiles_have_different_defaults():
@@ -143,6 +146,76 @@ def test_configure_plot_style_accepts_separate_size_overrides():
     assert ax.xaxis.get_ticklabels()[0].get_size() == 8.0
     assert ax.get_legend().get_texts()[0].get_size() == 7.5
     plt.close(fig)
+
+
+def test_configure_plot_style_accepts_text_color_override():
+    style = configure_plot_style(
+        layout="paper-1col",
+        theme="classic",
+        latex=False,
+        text_color="#202020",
+    )
+
+    assert style["text_color"] == "#202020"
+    assert style["axis_label_color"] == "#202020"
+    assert style["tick_color"] == "#202020"
+    assert style["legend_text_color"] == "#202020"
+    assert style["title_color"] == "#202020"
+    assert plt.rcParams["text.color"] == "#202020"
+    assert plt.rcParams["axes.labelcolor"] == "#202020"
+    assert plt.rcParams["axes.titlecolor"] == "#202020"
+    assert plt.rcParams["xtick.color"] == "#202020"
+    assert plt.rcParams["legend.labelcolor"] == "#202020"
+
+    fig, ax = plot_line(
+        [([0, 1], [1, 2], "circle", "A")],
+        "upper left",
+        fname=None,
+    )
+    ax.set_title("Readable title")
+    format_axes(ax)
+
+    assert ax.xaxis.label.get_color() == "#202020"
+    assert ax.xaxis.get_ticklabels()[0].get_color() == "#202020"
+    assert ax.get_title() == "Readable title"
+    assert ax.title.get_color() == "#202020"
+    assert ax.get_legend().get_texts()[0].get_color() == "#202020"
+    plt.close(fig)
+
+
+def test_configure_plot_style_accepts_text_color_presets_and_raw_colors():
+    preset = configure_plot_style(
+        layout="paper-1col",
+        theme="classic",
+        latex=False,
+        text_color="dark",
+    )
+    assert preset["text_color"] == "#202020"
+    assert preset["tick_color"] == "#202020"
+
+    gray = configure_plot_style(
+        layout="paper-1col",
+        theme="classic",
+        latex=False,
+        text_color="gray",
+    )
+    assert gray["text_color"] == "#555555"
+
+    raw = configure_plot_style(
+        layout="paper-1col",
+        theme="classic",
+        latex=False,
+        text_color="tab:blue",
+    )
+    assert raw["text_color"] == "#1f77b4"
+
+    rgb = configure_plot_style(
+        layout="paper-1col",
+        theme="classic",
+        latex=False,
+        text_color=(0.1, 0.2, 0.3),
+    )
+    assert rgb["text_color"] == "#1a334c"
 
 
 def test_scale_increases_font_and_line_defaults():

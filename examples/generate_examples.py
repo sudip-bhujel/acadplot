@@ -190,6 +190,44 @@ def generate_top_legend_example() -> None:
     save_example(fig, "top_legend_plot")
 
 
+def generate_text_color_example() -> None:
+    fig, axes = plt.subplots(1, 3, figsize=(6.8, 1.85), sharey=True)
+    presets = [
+        ("dark", "Preset: dark"),
+        ("gray", "Preset: gray"),
+        ("#202020", "Custom hex"),
+    ]
+
+    for ax, (text_color, title) in zip(axes, presets):
+        configure_plot_style(
+            layout="paper-2col-span",
+            theme="classic",
+            latex=True,
+            text_color=text_color,
+            tick_size=6.5,
+            label_size=7.0,
+            legend_size=6.5,
+            title_size=7.0,
+        )
+        plot_line(
+            LINE_DATA[:2],
+            "lower right",
+            ax=ax,
+            label=("Budget", r"Accuracy (\%)"),
+            xticks=[1, 2, 3, 4, 5],
+            yticks=range(74, 86, 4),
+            grid="major-y",
+            fname=None,
+        )
+        ax.set_title(title)
+        if ax is not axes[0]:
+            ax.set_ylabel("")
+            ax.tick_params(axis="y", left=False)
+
+    fig.subplots_adjust(left=0.08, right=0.99, bottom=0.24, top=0.82, wspace=0.18)
+    save_example(fig, "text_color_styles", tight_layout=False)
+
+
 def generate_scatter_example() -> None:
     configure_plot_style(layout="paper-2col", theme="classic", latex=True)
     fig, _ = plot_scatter(
@@ -329,6 +367,7 @@ def main() -> None:
     generate_presentation_example()
     generate_monospace_example()
     generate_top_legend_example()
+    generate_text_color_example()
     generate_scatter_example()
     generate_errorbar_example()
     generate_box_example()

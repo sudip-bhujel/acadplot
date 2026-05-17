@@ -8,6 +8,7 @@ import subprocess
 from typing import Iterator, Literal
 
 import matplotlib.pyplot as plt
+from matplotlib.colors import is_color_like, to_hex
 
 
 GridPreset = Literal["major-y", "major", "major-minor", "none"]
@@ -404,6 +405,20 @@ FONTS = {
 
 _VALID_GRIDS = {"major-y", "major", "major-minor", "none"}
 
+TEXT_COLORS = {
+    "theme": None,
+    "default": None,
+    "dark": "#202020",
+    "black": "#111111",
+    "charcoal": "#2B2B2B",
+    "slate": "#344054",
+    "gray": "#555555",
+    "dimgray": "#696969",
+    "muted": "#4A4A4A",
+    "soft": "#3F3F3F",
+    "light": "#F5F5F5",
+}
+
 
 def _build_style(
     layout: str,
@@ -416,6 +431,7 @@ def _build_style(
     legend_size: float | None = None,
     title_size: float | None = None,
     scale: float = 1.0,
+    text_color: str | None = None,
 ) -> dict[str, object]:
     if layout not in LAYOUTS:
         raise ValueError(
@@ -451,6 +467,17 @@ def _build_style(
         "legend_size", legend_size, default_legend_size
     )
     resolved_title_size = _resolve_size("title_size", title_size, default_title_size)
+    resolved_text_color = _resolve_color("text_color", text_color, theme_profile.text_color)
+    if text_color is None:
+        resolved_axis_label_color = theme_profile.axis_label_color
+        resolved_tick_color = theme_profile.tick_color
+        resolved_legend_text_color = theme_profile.legend_text_color
+        resolved_title_color = theme_profile.text_color
+    else:
+        resolved_axis_label_color = resolved_text_color
+        resolved_tick_color = resolved_text_color
+        resolved_legend_text_color = resolved_text_color
+        resolved_title_color = resolved_text_color
 
     return {
         "layout": layout,
@@ -492,12 +519,14 @@ def _build_style(
         "colors": deepcopy(theme_profile.colors),
         "palette": theme_profile.palette,
         "axis_color": theme_profile.axis_color,
-        "axis_label_color": theme_profile.axis_label_color,
-        "tick_color": theme_profile.tick_color,
-        "legend_text_color": theme_profile.legend_text_color,
+        "axis_label_color": resolved_axis_label_color,
+        "tick_color": resolved_tick_color,
+        "legend_text_color": resolved_legend_text_color,
         "legend_edge_color": theme_profile.legend_edge_color,
         "legend_face_color": theme_profile.legend_face_color,
-        "text_color": theme_profile.text_color,
+        "text_color": resolved_text_color,
+        "text_color_override": text_color,
+        "title_color": resolved_title_color,
     }
 
 
@@ -514,6 +543,17 @@ def _scaled_size(size: float | None, fallback: float, scale: float) -> float:
     if size is None:
         return fallback
     return float(size) * scale
+
+
+def _resolve_color(name: str, color, default: str):
+    if isinstance(color, str) and color in TEXT_COLORS:
+        preset = TEXT_COLORS[color]
+        resolved = default if preset is None else preset
+    else:
+        resolved = default if color is None else color
+    if not is_color_like(resolved):
+        raise ValueError(f"{name} must be a valid Matplotlib color.")
+    return to_hex(resolved)
 
 
 def _resolve_latex(latex: LatexMode, font: str) -> bool:
@@ -563,6 +603,11 @@ def available_fonts() -> tuple[str, ...]:
     return tuple(FONTS)
 
 
+def available_text_colors() -> tuple[str, ...]:
+    """Return built-in text color preset names."""
+    return tuple(TEXT_COLORS)
+
+
 def figure_size(layout: str | None = None) -> tuple[float, float]:
     """Return the figure size for a layout, or for the active style."""
     if layout is None:
@@ -589,6 +634,7 @@ def _sync_public_colors(style: dict[str, object]) -> None:
 def _apply_rcparams(style: dict[str, object]) -> None:
     font = FONTS[str(style["font"])]
     text_color = str(style["text_color"])
+    title_color = str(style["title_color"])
     axis_color = str(style["axis_color"])
     axis_label_color = str(style["axis_label_color"])
     tick_color = str(style["tick_color"])
@@ -605,8 +651,10 @@ def _apply_rcparams(style: dict[str, object]) -> None:
             "axes.labelsize": float(style["label_size"]),
             "axes.titlesize": float(style["title_size"]),
             "axes.labelcolor": axis_label_color,
+            "axes.titlecolor": title_color,
             "axes.edgecolor": axis_color,
             "axes.prop_cycle": plt.cycler(color=list(style["palette"])),
+            "text.color": text_color,
             "xtick.labelsize": float(style["tick_size"]),
             "ytick.labelsize": float(style["tick_size"]),
             "xtick.color": tick_color,
@@ -623,6 +671,7 @@ def _apply_rcparams(style: dict[str, object]) -> None:
             "legend.framealpha": float(style["legend_framealpha"]),
             "figure.figsize": tuple(style["fig_size"]),
             "figure.titlesize": float(style["title_size"]),
+            "figure.titleweight": "normal",
             "grid.color": str(style["grid_color"]),
             "grid.linewidth": float(style["grid_linewidth"]),
             "grid.alpha": float(style["grid_alpha"]),
@@ -650,6 +699,7 @@ def configure_plot_style(
     legend_size: float | None = None,
     title_size: float | None = None,
     scale: float = 1.0,
+    text_color: str | None = None,
 ) -> dict[str, object]:
     """
     Configure global AcadPlot style settings.
@@ -670,6 +720,7 @@ def configure_plot_style(
         legend_size=legend_size,
         title_size=title_size,
         scale=scale,
+        text_color=text_color,
     )
     _apply_rcparams(_CURRENT_STYLE)
     _sync_public_colors(_CURRENT_STYLE)
@@ -688,6 +739,7 @@ def use_style(
     legend_size: float | None = None,
     title_size: float | None = None,
     scale: float | None = None,
+    text_color: str | None = None,
 ) -> Iterator[dict[str, object]]:
     """Temporarily apply an AcadPlot style inside a ``with`` block."""
     global _CURRENT_STYLE
@@ -709,6 +761,9 @@ def use_style(
     resolved_title_size = (
         previous_style["title_size_override"] if title_size is None else title_size
     )
+    resolved_text_color = (
+        previous_style["text_color_override"] if text_color is None else text_color
+    )
     resolved_scale = float(previous_style["scale"]) if scale is None else scale
 
     try:
@@ -723,6 +778,7 @@ def use_style(
             legend_size=resolved_legend_size,
             title_size=resolved_title_size,
             scale=resolved_scale,
+            text_color=resolved_text_color,
         )
     finally:
         _CURRENT_STYLE = previous_style
@@ -736,9 +792,11 @@ def apply_axis_style(ax) -> None:
     axis_color = str(style["axis_color"])
     axis_label_color = str(style["axis_label_color"])
     tick_color = str(style["tick_color"])
+    title_color = str(style["title_color"])
 
     ax.xaxis.label.set_color(axis_label_color)
     ax.yaxis.label.set_color(axis_label_color)
+    ax.title.set_color(title_color)
     ax.tick_params(axis="both", colors=tick_color)
     for spine in ax.spines.values():
         spine.set_color(axis_color)

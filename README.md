@@ -22,6 +22,8 @@ The committed examples use LaTeX Inconsolata; regeneration requires a TeX instal
 
 <img src="examples/top_legend_plot.png" width="400">
 
+<img src="examples/text_color_styles.png" width="500">
+
 ### Bar Figures
 
 <img src="examples/bar_plot.png" width="400">
@@ -134,6 +136,61 @@ configure_plot_style(
     legend_size=8.5,
     title_size=11,
 )
+```
+
+Use one text-color knob when the default text is too light for a paper or
+projector:
+
+```python
+configure_plot_style(
+    layout="paper-2col",
+    theme="classic",
+    text_color="dark",
+)
+```
+
+`text_color` applies to axis labels, tick labels, legend text, titles, and
+AcadPlot annotations. Built-in text presets are separate from the data-series
+color names:
+
+```python
+from acadplot import available_text_colors
+
+print(available_text_colors())
+# ("theme", "default", "dark", "black", "charcoal", "slate", "gray", "dimgray", "muted", "soft", "light")
+```
+
+You can also pass any Matplotlib-compatible color:
+
+```python
+configure_plot_style(text_color="#202020")
+configure_plot_style(text_color="tab:blue")
+configure_plot_style(text_color=(0.1, 0.2, 0.3))
+```
+
+Example with a built-in preset:
+
+```python
+from acadplot import configure_plot_style, plot_line
+
+configure_plot_style(
+    layout="paper-2col",
+    theme="classic",
+    text_color="dark",
+)
+
+plot_line(
+    data,
+    "lower right",
+    label=("Budget", "Accuracy (%)"),
+    fname="dark_text_plot.pdf",
+)
+```
+
+Example with a custom hex color:
+
+```python
+configure_plot_style(text_color="#202020")
 ```
 
 Scale an entire style when the figure needs to be uniformly stronger:
@@ -659,12 +716,14 @@ markers = {
 
 Draw a single line with markers on the given axes.
 
-### `configure_plot_style(layout, theme, font, latex, font_size, label_size, tick_size, legend_size, title_size, scale)`
+### `configure_plot_style(layout, theme, font, latex, font_size, label_size, tick_size, legend_size, title_size, scale, text_color)`
 
 Configure global plot style settings with LaTeX rendering. Layouts and themes
 are composable. Each layout has its own default figure size and typography, but
 explicit `font_size`, `label_size`, `tick_size`, `legend_size`, and `title_size`
-arguments always override those defaults:
+arguments always override those defaults. Use `text_color` as a universal text
+color override for axis labels, tick labels, legend text, titles, and AcadPlot
+annotations:
 
 ```python
 configure_plot_style(
@@ -675,6 +734,7 @@ configure_plot_style(
     label_size=10,
     tick_size=8.5,
     legend_size=8.5,
+    text_color="#202020",
     scale=1.05,
 )
 ```
@@ -683,6 +743,7 @@ Helper APIs:
 
 - `available_fonts()`: Return supported font preset names
 - `available_layouts()`: Return supported layout profile names
+- `available_text_colors()`: Return built-in text color preset names
 - `available_themes()`: Return supported theme names
 - `figure_size(layout=None)`: Return the active or named layout figure size
 - `get_current_style()`: Return the active style settings

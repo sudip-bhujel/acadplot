@@ -1,6 +1,7 @@
 from .styles import (
     available_fonts,
     available_layouts,
+    available_text_colors,
     available_themes,
     configure_plot_style,
     despine,
@@ -43,6 +44,7 @@ __all__ = [
     "configure_plot_style",
     "available_fonts",
     "available_layouts",
+    "available_text_colors",
     "available_themes",
     "figure_size",
     "format_axes",
