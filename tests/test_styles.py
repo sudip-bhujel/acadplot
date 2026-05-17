@@ -57,13 +57,23 @@ def test_configure_plot_style_updates_rcparams():
 def test_layout_profiles_have_different_defaults():
     one_col = configure_plot_style(layout="paper-1col", theme="classic", latex=False)
     two_col = configure_plot_style(layout="paper-2col", theme="classic", latex=False)
+    two_col_subplot = configure_plot_style(
+        layout="paper-2col-subplot", theme="classic", latex=False
+    )
     span = configure_plot_style(layout="paper-2col-span", theme="classic", latex=False)
 
     assert two_col["fig_size"][0] < one_col["fig_size"][0]
+    assert two_col_subplot["fig_size"][0] == two_col["fig_size"][0]
+    assert two_col_subplot["fig_size"][1] < two_col["fig_size"][1]
     assert span["fig_size"][0] > one_col["fig_size"][0]
     assert one_col["font_size"] < two_col["font_size"]
+    assert two_col_subplot["font_size"] < one_col["font_size"]
+    assert two_col_subplot["tick_size"] < two_col_subplot["label_size"]
+    assert two_col_subplot["legend_size"] < two_col_subplot["label_size"]
+    assert two_col_subplot["line_width"] < two_col["line_width"]
     assert span["font_size"] < two_col["font_size"]
     assert one_col["line_width"] < two_col["line_width"]
+    assert figure_size("paper-2col-subplot") == two_col_subplot["fig_size"]
     assert figure_size("paper-2col") == two_col["fig_size"]
 
 
@@ -363,6 +373,27 @@ def test_legend_outside_for_line_plot():
 
     assert ax.get_legend() is not None
     assert ax.get_legend()._loc == 6
+    plt.close(fig)
+
+
+def test_top_legend_multiple_columns_for_line_plot():
+    configure_plot_style(layout="paper-1col", theme="classic", latex=False)
+    fig, ax = plot_line(
+        [
+            ([0, 1], [1, 2], "circle", "A"),
+            ([0, 1], [2, 3], "square", "B"),
+            ([0, 1], [3, 4], "triangle_up", "C"),
+        ],
+        "lower center",
+        ncols=3,
+        legend_outside="top",
+        fname=None,
+    )
+
+    legend = ax.get_legend()
+    assert legend is not None
+    assert legend._loc == 8
+    assert legend._ncols == 3
     plt.close(fig)
 
 

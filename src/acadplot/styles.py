@@ -35,6 +35,10 @@ class LayoutProfile:
     legend_frame_linewidth: float
     line_grid: GridPreset
     bar_grid: GridPreset
+    label_size: float | None = None
+    tick_size: float | None = None
+    legend_size: float | None = None
+    title_size: float | None = None
 
 
 @dataclass(frozen=True)
@@ -127,6 +131,31 @@ LAYOUTS = {
         legend_frame_linewidth=0.2,
         line_grid="major",
         bar_grid="major-y",
+    ),
+    "paper-2col-subplot": LayoutProfile(
+        fig_size=(3.35, 1.45),
+        font_size=5.9,
+        line_width=0.65,
+        marker_scale=0.68,
+        marker_edge_width=0.36,
+        axes_linewidth=0.42,
+        major_tick_width=0.38,
+        minor_tick_width=0.28,
+        grid_linewidth=0.22,
+        minor_grid_linewidth=0.16,
+        grid_alpha=0.2,
+        minor_grid_alpha=0.1,
+        bar_alpha=0.86,
+        bar_edge_width=0.2,
+        legend_frameon=True,
+        legend_framealpha=0.6,
+        legend_frame_linewidth=0.16,
+        line_grid="major-y",
+        bar_grid="major-y",
+        label_size=5.8,
+        tick_size=4.8,
+        legend_size=5.0,
+        title_size=5.8,
     ),
     "paper-2col-span": LayoutProfile(
         fig_size=(6.8, 2.8),
@@ -410,10 +439,18 @@ def _build_style(
     ) * scale
     if resolved_font_size <= 0:
         raise ValueError("font_size must be a positive number.")
-    resolved_label_size = _resolve_size("label_size", label_size, resolved_font_size)
-    resolved_tick_size = _resolve_size("tick_size", tick_size, resolved_font_size)
-    resolved_legend_size = _resolve_size("legend_size", legend_size, resolved_font_size)
-    resolved_title_size = _resolve_size("title_size", title_size, resolved_font_size)
+    default_label_size = _scaled_size(layout_profile.label_size, resolved_font_size, scale)
+    default_tick_size = _scaled_size(layout_profile.tick_size, resolved_font_size, scale)
+    default_legend_size = _scaled_size(
+        layout_profile.legend_size, resolved_font_size, scale
+    )
+    default_title_size = _scaled_size(layout_profile.title_size, resolved_font_size, scale)
+    resolved_label_size = _resolve_size("label_size", label_size, default_label_size)
+    resolved_tick_size = _resolve_size("tick_size", tick_size, default_tick_size)
+    resolved_legend_size = _resolve_size(
+        "legend_size", legend_size, default_legend_size
+    )
+    resolved_title_size = _resolve_size("title_size", title_size, default_title_size)
 
     return {
         "layout": layout,
@@ -471,6 +508,12 @@ def _resolve_size(name: str, size: float | None, default: float) -> float:
     if resolved <= 0:
         raise ValueError(f"{name} must be a positive number.")
     return resolved
+
+
+def _scaled_size(size: float | None, fallback: float, scale: float) -> float:
+    if size is None:
+        return fallback
+    return float(size) * scale
 
 
 def _resolve_latex(latex: LatexMode, font: str) -> bool:

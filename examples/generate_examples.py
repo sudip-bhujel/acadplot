@@ -14,8 +14,9 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from acadplot import (  # noqa: E402
-    configure_plot_style,
     annotate_points,
+    configure_plot_style,
+    figure_size,
     format_axes,
     format_legend,
     panel_labels,
@@ -40,8 +41,10 @@ LINE_DATA = [
 ]
 
 
-def save_example(fig, name: str, *, pdf: bool = False) -> None:
-    save(fig, name, directory=OUT, pdf=pdf)
+def save_example(
+    fig, name: str, *, pdf: bool = False, tight_layout: bool = True
+) -> None:
+    save(fig, name, directory=OUT, pdf=pdf, tight_layout=tight_layout)
 
 
 def generate_line_example() -> None:
@@ -59,8 +62,14 @@ def generate_line_example() -> None:
 
 
 def generate_subplot_example() -> None:
-    configure_plot_style(layout="paper-2col-span", theme="colorblind", latex=True)
-    fig, axes = plt.subplots(1, 2, figsize=(6.8, 2.5), sharey=True)
+    configure_plot_style(layout="paper-2col-subplot", theme="colorblind", latex=True)
+    fig, axes = plt.subplots(
+        1,
+        2,
+        figsize=figure_size(),
+        sharey=True,
+        gridspec_kw={"wspace": 0.1},
+    )
     plot_line(
         LINE_DATA[:2],
         "lower right",
@@ -79,10 +88,10 @@ def generate_subplot_example() -> None:
         yticks=range(72, 87, 2),
         fname=None,
     )
-    axes[0].set_title("Small data regime")
-    axes[1].set_title("Large data regime")
-    fig.tight_layout(pad=0.3, w_pad=1.5)
-    save_example(fig, "subplot", pdf=True)
+    axes[1].set_ylabel("")
+    axes[1].tick_params(axis="y", left=False)
+    fig.subplots_adjust(left=0.14, right=0.99, bottom=0.24, top=0.86, wspace=0.18)
+    save_example(fig, "subplot", pdf=True, tight_layout=False)
 
 
 def generate_bar_examples() -> None:
@@ -160,6 +169,25 @@ def generate_monospace_example() -> None:
         fname=None,
     )
     save_example(fig, "monospace_style", pdf=True)
+
+
+def generate_top_legend_example() -> None:
+    configure_plot_style(
+        layout="paper-2col", theme="classic", latex=True, legend_size=8.5
+    )
+    fig, _ = plot_line(
+        LINE_DATA,
+        location="lower center",
+        label=("Training budget", r"Accuracy (\%)"),
+        xticks=[1, 2, 3, 4, 5],
+        yticks=range(72, 87, 2),
+        ystart=71,
+        ncols=3,
+        columnspacing=0.9,
+        legend_outside="top",
+        fname=None,
+    )
+    save_example(fig, "top_legend_plot")
 
 
 def generate_scatter_example() -> None:
@@ -300,6 +328,7 @@ def main() -> None:
     generate_bar_examples()
     generate_presentation_example()
     generate_monospace_example()
+    generate_top_legend_example()
     generate_scatter_example()
     generate_errorbar_example()
     generate_box_example()

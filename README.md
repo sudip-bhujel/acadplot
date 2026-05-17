@@ -20,6 +20,8 @@ The committed examples use LaTeX Inconsolata; regeneration requires a TeX instal
 
 <img src="examples/subplot.png" width="500">
 
+<img src="examples/top_legend_plot.png" width="400">
+
 ### Bar Figures
 
 <img src="examples/bar_plot.png" width="400">
@@ -48,7 +50,7 @@ The examples cover all built-in themes and layout profiles:
 - `classic` with `paper-2col`: compact monospace line plot
 - `nature` with `paper-1col`: bar plot
 - `colorblind` with `paper-2col`: grouped bar plot for one column in a two-column paper
-- `colorblind` with `paper-2col-span`: subplot across both columns
+- `colorblind` with `paper-2col-subplot`: two small subplots inside one column of a two-column paper
 - `mono` with `paper-1col`: stacked bar plot
 - `warm` with `presentation`: presentation-scale line plot
 
@@ -144,13 +146,53 @@ Layout meaning:
 
 - `paper-1col`: full-width figure for a single-column paper.
 - `paper-2col`: one-column figure inside a two-column paper; narrower, with the largest paper font and heavier marks because it is visually reduced on the page.
+- `paper-2col-subplot`: two compact panels inside one column of a two-column paper; same width as `paper-2col`, with smaller fonts and lighter marks to avoid crowding.
 - `paper-2col-span`: figure spanning both columns in a two-column paper.
 - `presentation`: larger screen/projector figures.
+
+Layout defaults:
+
+| Layout | Figure size | Font defaults | Use when |
+|---|---:|---:|---|
+| `paper-1col` | `5.5 x 3.2 in` | balanced paper text | single-column paper figure |
+| `paper-2col` | `3.35 x 2.15 in` | larger text and marks | one plot in one column of a two-column paper |
+| `paper-2col-subplot` | `3.35 x 1.45 in` | smaller ticks/legend, compact marks | two small panels inside one column of a two-column paper |
+| `paper-2col-span` | `6.8 x 2.8 in` | medium paper text | figure spanning both columns |
+| `presentation` | `7.2 x 4.2 in` | large labels and heavier marks | slides and talks |
+
+`paper-2col-subplot` intentionally uses smaller tick labels than axis labels:
+`tick_size=4.8`, `legend_size=5.0`, `label_size=5.8`, and `title_size=5.8`.
+This keeps dense two-panel figures legible without letting x/y tick labels
+dominate the plot area.
 
 Use `font="libertine"` when a serif academic style is preferred:
 
 ```python
 configure_plot_style(layout="paper-2col", theme="classic", font="libertine")
+```
+
+For two subplots inside one column of a two-column paper, let the layout drive
+the figure size:
+
+```python
+import matplotlib.pyplot as plt
+from acadplot import configure_plot_style, figure_size, plot_line, save
+
+configure_plot_style(layout="paper-2col-subplot", theme="colorblind")
+fig, axes = plt.subplots(
+    1,
+    2,
+    figsize=figure_size(),
+    sharey=True,
+    gridspec_kw={"wspace": 0.18},
+)
+
+plot_line(data_a, "lower right", ax=axes[0], fname=None)
+plot_line(data_b, "lower right", ax=axes[1], fname=None)
+axes[1].set_ylabel("")
+axes[1].tick_params(axis="y", left=False)
+fig.subplots_adjust(left=0.14, right=0.99, bottom=0.24, top=0.86, wspace=0.18)
+save(fig, "one_column_two_panel.pdf", tight_layout=False)
 ```
 
 ### Saving Figures
@@ -214,6 +256,20 @@ Use `legend_outside` on built-in chart helpers when the plot area is crowded:
 plot_line(data, "upper left", legend_outside="right", fname="outside_legend.pdf")
 ```
 
+For a legend above the plot with multiple columns:
+
+```python
+plot_line(
+    data,
+    "lower center",
+    label=("Training budget", "Accuracy (%)"),
+    ncols=3,
+    columnspacing=0.9,
+    legend_outside="top",
+    fname="top_legend.pdf",
+)
+```
+
 To inspect style choices:
 
 ```python
@@ -230,7 +286,7 @@ Available layouts:
 from acadplot import available_layouts
 
 print(available_layouts())
-# ("paper-1col", "paper-2col", "paper-2col-span", "presentation")
+# ("paper-1col", "paper-2col", "paper-2col-subplot", "paper-2col-span", "presentation")
 ```
 
 Available professional themes:
@@ -605,7 +661,10 @@ Draw a single line with markers on the given axes.
 
 ### `configure_plot_style(layout, theme, font, latex, font_size, label_size, tick_size, legend_size, title_size, scale)`
 
-Configure global plot style settings with LaTeX rendering. Layouts and themes are composable:
+Configure global plot style settings with LaTeX rendering. Layouts and themes
+are composable. Each layout has its own default figure size and typography, but
+explicit `font_size`, `label_size`, `tick_size`, `legend_size`, and `title_size`
+arguments always override those defaults:
 
 ```python
 configure_plot_style(
@@ -628,6 +687,9 @@ Helper APIs:
 - `figure_size(layout=None)`: Return the active or named layout figure size
 - `get_current_style()`: Return the active style settings
 - `use_style(...)`: Temporarily apply a style inside a `with` block
+
+For manual subplots, use `figure_size()` instead of hardcoding `figsize` if you
+want layout changes to affect the canvas.
 
 ### Utility Functions
 
