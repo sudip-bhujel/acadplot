@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from acadplot import (
     available_fonts,
     available_layouts,
+    available_patterns,
     available_text_colors,
     available_themes,
     annotate_points,
@@ -55,6 +56,7 @@ def test_configure_plot_style_updates_rcparams():
     assert "inconsolata" in available_fonts()
     assert "dark" in available_text_colors()
     assert "gray" in available_text_colors()
+    assert "diagonal" in available_patterns()
 
 
 def test_layout_profiles_have_different_defaults():
@@ -308,6 +310,42 @@ def test_explicit_bar_overrides_and_default_grid():
     assert ax.get_axisbelow()
     assert any(line.get_visible() for line in ax.get_ygridlines())
     assert not any(line.get_visible() for line in ax.get_xgridlines())
+    plt.close(fig)
+
+
+def test_bar_patterns_apply_to_bar_variants():
+    configure_plot_style(layout="paper-1col", theme="classic", latex=False)
+
+    fig, ax = plot_bar(
+        [
+            ([0], [2], "blue", "A"),
+            ([1], [3], "green", "B"),
+        ],
+        "upper left",
+        patterns=["diagonal", "cross"],
+        fname=None,
+    )
+    assert [patch.get_hatch() for patch in ax.patches] == ["/", "x"]
+    plt.close(fig)
+
+    fig, ax = plot_grouped_bar(
+        [
+            ("G1", [(1.0, "blue", "diagonal", "A"), (2.0, "green", "cross", "B")]),
+            ("G2", [(1.5, "blue", "diagonal", "A"), (2.5, "green", "cross", "B")]),
+        ],
+        "upper left",
+        fname=None,
+    )
+    assert [patch.get_hatch() for patch in ax.patches] == ["/", "/", "x", "x"]
+    plt.close(fig)
+
+    fig, ax = plot_stacked_bar(
+        ["G1", "G2"],
+        [([1, 2], "blue", "diagonal", "A"), ([2, 1], "green", "cross", "B")],
+        "upper left",
+        fname=None,
+    )
+    assert [patch.get_hatch() for patch in ax.patches] == ["/", "/", "x", "x"]
     plt.close(fig)
 
 

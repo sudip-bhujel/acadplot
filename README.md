@@ -32,6 +32,8 @@ The committed examples use LaTeX Inconsolata; regeneration requires a TeX instal
 
 <img src="examples/stacked_bar_plot.png" width="400">
 
+<img src="examples/pattern_bar_plot.png" width="400">
+
 ### Additional Academic Figures
 
 <img src="examples/scatter_plot.png" width="400">
@@ -556,6 +558,47 @@ plot_grouped_bar(
 )
 ```
 
+### Bar Patterns
+
+Use named pattern presets, integer pattern indices, or raw Matplotlib hatch
+strings. Patterns work for `plot_bar`, `plot_grouped_bar`, and
+`plot_stacked_bar`.
+
+```python
+from acadplot import plot_grouped_bar, configure_plot_style, available_patterns
+
+print(available_patterns())
+# ("none", "diagonal", "back_diagonal", "cross", "plus", "dots", "circles", "stars", "horizontal", "vertical", "grid")
+
+configure_plot_style(layout="paper-1col", theme="colorblind", text_color="dark")
+
+plot_grouped_bar(
+    [
+        ("Dataset A", [(81.2, "Baseline"), (83.5, "AcadPlot")]),
+        ("Dataset B", [(84.4, "Baseline"), (86.2, "AcadPlot")]),
+        ("Dataset C", [(86.1, "Baseline"), (88.0, "AcadPlot")]),
+    ],
+    location="upper left",
+    label=("Dataset", "Score"),
+    patterns=["none", "diagonal"],
+    ncols=2,
+    fname="pattern_bar.pdf",
+)
+```
+
+For per-series control, add the pattern before the label:
+
+```python
+plot_stacked_bar(
+    ["A", "B"],
+    [
+        ([35, 42], "blue", "diagonal", "Compute"),
+        ([25, 22], "green", "dots", "Memory"),
+    ],
+    location="upper left",
+)
+```
+
 ### Stacked Bar Plot
 
 ```python
@@ -743,6 +786,7 @@ Helper APIs:
 
 - `available_fonts()`: Return supported font preset names
 - `available_layouts()`: Return supported layout profile names
+- `available_patterns()`: Return built-in bar pattern preset names
 - `available_text_colors()`: Return built-in text color preset names
 - `available_themes()`: Return supported theme names
 - `figure_size(layout=None)`: Return the active or named layout figure size
@@ -768,6 +812,7 @@ want layout changes to affect the canvas.
 - `blend_color(rgba1, rgba2)`: Blend two RGBA colors
 - `colors`: Dictionary of pre-defined color names and hex values
 - `markers`: Dictionary of marker names and their matplotlib properties
+- `patterns`: Dictionary of pattern names and Matplotlib hatch strings
 
 ## License
 

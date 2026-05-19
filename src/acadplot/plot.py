@@ -17,6 +17,7 @@ from .styles import (
 )
 from .utils import (
     annotate_points,
+    available_patterns,
     blend_color,
     colors,
     format_legend,
@@ -24,6 +25,7 @@ from .utils import (
     markers,
     new_alpha,
     panel_labels,
+    patterns,
     save,
     save_all,
     set_output_dir,
@@ -59,8 +61,10 @@ __all__ = [
     "panel_labels",
     "annotate_points",
     "theme_preview",
+    "available_patterns",
     "colors",
     "markers",
+    "patterns",
     "new_alpha",
     "blend_color",
 ]

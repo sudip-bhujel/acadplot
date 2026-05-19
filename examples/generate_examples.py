@@ -137,6 +137,25 @@ def generate_bar_examples() -> None:
     save_example(fig, "stacked_bar_plot")
 
 
+def generate_pattern_bar_example() -> None:
+    configure_plot_style(
+        layout="paper-1col", theme="classic", latex=True, text_color="dark"
+    )
+    fig, _ = plot_grouped_bar(
+        [
+            ("Dataset A", [(81.2, "Baseline"), (83.5, "AcadPlot")]),
+            ("Dataset B", [(84.4, "Baseline"), (86.2, "AcadPlot")]),
+            ("Dataset C", [(86.1, "Baseline"), (88.0, "AcadPlot")]),
+        ],
+        location="upper left",
+        label=("Dataset", "Score"),
+        patterns=["dots", "diagonal"],
+        ncols=2,
+        fname=None,
+    )
+    save_example(fig, "pattern_bar_plot")
+
+
 def generate_presentation_example() -> None:
     configure_plot_style(layout="presentation", theme="warm", latex=True)
     fig, _ = plot_line(
@@ -364,6 +383,7 @@ def main() -> None:
     generate_line_example()
     generate_subplot_example()
     generate_bar_examples()
+    generate_pattern_bar_example()
     generate_presentation_example()
     generate_monospace_example()
     generate_top_legend_example()

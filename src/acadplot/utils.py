@@ -393,6 +393,26 @@ markers = {
     "none": ("", 0),
 }
 
+patterns = {
+    "none": "",
+    "diagonal": "/",
+    "back_diagonal": "\\",
+    "cross": "x",
+    "plus": "+",
+    "dots": ".",
+    "circles": "o",
+    "stars": "*",
+    "horizontal": "-",
+    "vertical": "|",
+    "grid": "++",
+}
+
+
+def available_patterns() -> tuple[str, ...]:
+    """Return built-in bar pattern preset names."""
+    return tuple(patterns)
+
+
 colors = {
     "blue": "#0173B2",
     "orange": "#DE8F05",

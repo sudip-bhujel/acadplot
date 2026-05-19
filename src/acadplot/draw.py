@@ -3,7 +3,7 @@ from typing import List
 from matplotlib.colors import is_color_like, to_rgba
 
 from .styles import get_current_style
-from .utils import colors, markers, new_alpha
+from .utils import colors, markers, new_alpha, patterns
 
 
 def resolve_color_key(color_key: str | int | None) -> str | None:
@@ -19,6 +19,17 @@ def resolve_color_key(color_key: str | int | None) -> str | None:
     raise ValueError(
         f"Unknown color {color_key!r}. Use a theme color name, index, or Matplotlib color."
     )
+
+
+def resolve_pattern_key(pattern_key: str | int | None) -> str | None:
+    """Resolve an AcadPlot pattern preset, index, raw hatch string, or no hatch."""
+    if pattern_key is None:
+        return None
+    if isinstance(pattern_key, int):
+        return list(patterns.values())[pattern_key]
+    if pattern_key in patterns:
+        return patterns[pattern_key]
+    return pattern_key
 
 
 def draw(
@@ -74,6 +85,7 @@ def draw_bar(
     color_key: str | int | None,
     label: str,
     width: float = 0.35,
+    pattern_key: str | int | None = None,
 ):
     """Draw a bar on the given axes.
 
@@ -85,10 +97,18 @@ def draw_bar(
             or None to use the active theme palette cycle.
         label (str): Label for the bar.
         width (float): Bar width. Defaults to 0.35.
+        pattern_key (str | int | None): Hatch pattern name, index, raw Matplotlib
+            hatch string, or None.
     """
     color = resolve_color_key(color_key)
+    pattern = resolve_pattern_key(pattern_key)
     style = get_current_style()
-    color_kwargs = {"color": color, "edgecolor": color} if color is not None else {}
+    if color is None:
+        color_kwargs = {}
+    elif pattern:
+        color_kwargs = {"color": color, "edgecolor": str(style["axis_color"])}
+    else:
+        color_kwargs = {"color": color, "edgecolor": color}
 
     container = ax.bar(
         x,
@@ -96,10 +116,11 @@ def draw_bar(
         width,
         linewidth=float(style["bar_edge_width"]),
         alpha=float(style["bar_alpha"]),
+        hatch=pattern,
         label=label,
         zorder=3,
         **color_kwargs,
     )
     if color is None:
         for patch in container.patches:
-            patch.set_edgecolor(patch.get_facecolor())
+            patch.set_edgecolor(str(style["axis_color"]) if pattern else patch.get_facecolor())

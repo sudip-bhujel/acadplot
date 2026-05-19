@@ -1,8 +1,8 @@
-from typing import List, Optional, Tuple
+from typing import List, Optional, Sequence, Tuple
 
 import matplotlib.pyplot as plt
 
-from .draw import draw_bar, resolve_color_key
+from .draw import draw_bar, resolve_color_key, resolve_pattern_key
 from .styles import (
     apply_axis_style,
     apply_grid,
@@ -44,35 +44,56 @@ def _resolve_text_sizes(style, font_size, label_size, tick_size, legend_size):
 
 
 def _parse_bar(bar):
+    if len(bar) == 5:
+        x, y, color_key, pattern_key, bar_label = bar
+        return x, y, color_key, pattern_key, bar_label
     if len(bar) == 4:
         x, y, color_key, bar_label = bar
-        return x, y, color_key, bar_label
+        return x, y, color_key, None, bar_label
     if len(bar) == 3:
         x, y, bar_label = bar
-        return x, y, None, bar_label
+        return x, y, None, None, bar_label
     raise ValueError("Bar entries must be (x, y, color, label) or (x, y, label).")
 
 
 def _parse_group_bar(entry):
+    if len(entry) == 4:
+        value, color_key, pattern_key, bar_label = entry
+        return value, color_key, pattern_key, bar_label
     if len(entry) == 3:
         value, color_key, bar_label = entry
-        return value, color_key, bar_label
+        return value, color_key, None, bar_label
     if len(entry) == 2:
         value, bar_label = entry
-        return value, None, bar_label
+        return value, None, None, bar_label
     raise ValueError(
         "Grouped bar entries must be (value, color, label) or (value, label)."
     )
 
 
 def _parse_stack(stack):
+    if len(stack) == 4:
+        values, color_key, pattern_key, stack_label = stack
+        return values, color_key, pattern_key, stack_label
     if len(stack) == 3:
         values, color_key, stack_label = stack
-        return values, color_key, stack_label
+        return values, color_key, None, stack_label
     if len(stack) == 2:
         values, stack_label = stack
-        return values, None, stack_label
+        return values, None, None, stack_label
     raise ValueError("Stack entries must be (values, color, label) or (values, label).")
+
+
+def _resolve_pattern(patterns, index: int, label: str, explicit_pattern):
+    if explicit_pattern is not None:
+        return resolve_pattern_key(explicit_pattern)
+    if patterns is None:
+        return None
+    if isinstance(patterns, dict):
+        return resolve_pattern_key(patterns.get(label))
+    if not patterns:
+        return None
+    return resolve_pattern_key(patterns[index % len(patterns)])
 
 
 def _add_legend(
@@ -108,6 +129,7 @@ def plot_bar(
     ncols: int = 1,
     columnspacing: float = 0.5,
     bar_width: float = 0.35,
+    patterns: Optional[Sequence[str | int] | dict[str, str | int]] = None,
     grid: Optional[str] = None,
     fname: Optional[str] = "bar_plot.pdf",
     legend_outside: bool | str = False,
@@ -152,8 +174,10 @@ def plot_bar(
     ax.set_ylabel(label[1], fontsize=label_size)
     apply_grid(ax, grid or str(style["bar_grid"]))
 
-    for bar in bars:
-        draw_bar(ax, *_parse_bar(bar), bar_width)
+    for bar_idx, bar in enumerate(bars):
+        x, y, color_key, pattern_key, bar_label = _parse_bar(bar)
+        pattern = _resolve_pattern(patterns, bar_idx, bar_label, pattern_key)
+        draw_bar(ax, x, y, color_key, bar_label, bar_width, pattern)
 
     _add_legend(ax, location, legend_size, ncols, columnspacing, legend_outside)
 
@@ -184,6 +208,7 @@ def plot_grouped_bar(
     ncols: int = 1,
     columnspacing: float = 0.5,
     bar_width: float = 0.25,
+    patterns: Optional[Sequence[str | int] | dict[str, str | int]] = None,
     grid: Optional[str] = None,
     fname: Optional[str] = "grouped_bar_plot.pdf",
     legend_outside: bool | str = False,
@@ -235,8 +260,9 @@ def plot_grouped_bar(
             pos + (bar_idx - n_bars / 2 + 0.5) * bar_width for pos in group_positions
         ]
         values = [group[1][bar_idx][0] for group in groups]
-        _, color_key, bar_label = _parse_group_bar(groups[0][1][bar_idx])
-        draw_bar(ax, positions, values, color_key, bar_label, bar_width)
+        _, color_key, pattern_key, bar_label = _parse_group_bar(groups[0][1][bar_idx])
+        pattern = _resolve_pattern(patterns, bar_idx, bar_label, pattern_key)
+        draw_bar(ax, positions, values, color_key, bar_label, bar_width, pattern)
 
     ax.set_xticks(list(group_positions))
     ax.set_xticklabels([g[0] for g in groups], rotation=rotation, fontsize=tick_size)
@@ -266,6 +292,7 @@ def plot_stacked_bar(
     ncols: int = 1,
     columnspacing: float = 0.5,
     bar_width: float = 0.35,
+    patterns: Optional[Sequence[str | int] | dict[str, str | int]] = None,
     grid: Optional[str] = None,
     fname: Optional[str] = "stacked_bar_plot.pdf",
     legend_outside: bool | str = False,
@@ -313,10 +340,16 @@ def plot_stacked_bar(
     x_positions = range(len(categories))
     bottoms = [0.0] * len(categories)
 
-    for stack in stacks:
-        values, color_key, stack_label = _parse_stack(stack)
+    for stack_idx, stack in enumerate(stacks):
+        values, color_key, pattern_key, stack_label = _parse_stack(stack)
         color = resolve_color_key(color_key)
-        color_kwargs = {"color": color, "edgecolor": color} if color is not None else {}
+        pattern = _resolve_pattern(patterns, stack_idx, stack_label, pattern_key)
+        if color is None:
+            color_kwargs = {}
+        elif pattern:
+            color_kwargs = {"color": color, "edgecolor": str(style["axis_color"])}
+        else:
+            color_kwargs = {"color": color, "edgecolor": color}
         container = ax.bar(
             x_positions,
             values,
@@ -324,13 +357,16 @@ def plot_stacked_bar(
             bottom=bottoms,
             linewidth=float(style["bar_edge_width"]),
             alpha=float(style["bar_alpha"]),
+            hatch=pattern,
             label=stack_label,
             zorder=3,
             **color_kwargs,
         )
         if color is None:
             for patch in container.patches:
-                patch.set_edgecolor(patch.get_facecolor())
+                patch.set_edgecolor(
+                    str(style["axis_color"]) if pattern else patch.get_facecolor()
+                )
         bottoms = [bottom + value for bottom, value in zip(bottoms, values)]
 
     ax.set_xticks(list(x_positions))
