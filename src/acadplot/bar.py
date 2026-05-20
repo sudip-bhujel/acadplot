@@ -1,6 +1,7 @@
 from typing import List, Optional, Sequence, Tuple
 
 import matplotlib.pyplot as plt
+from matplotlib.colors import to_rgba
 
 from .draw import draw_bar, resolve_color_key, resolve_pattern_key
 from .styles import (
@@ -9,7 +10,7 @@ from .styles import (
     configure_plot_style,
     get_current_style,
 )
-from .utils import save, styled_legend
+from .utils import new_alpha, save, styled_legend
 
 
 def _prepare_axes(ax, fig_size):
@@ -344,29 +345,29 @@ def plot_stacked_bar(
         values, color_key, pattern_key, stack_label = _parse_stack(stack)
         color = resolve_color_key(color_key)
         pattern = _resolve_pattern(patterns, stack_idx, stack_label, pattern_key)
-        if color is None:
-            color_kwargs = {}
-        elif pattern:
-            color_kwargs = {"color": color, "edgecolor": str(style["axis_color"])}
-        else:
-            color_kwargs = {"color": color, "edgecolor": color}
+        bar_alpha = float(style["bar_alpha"])
+        bar_edge_color = str(style["bar_edge_color"])
+        color_kwargs = {"edgecolor": bar_edge_color}
+        if color is not None:
+            color_kwargs["facecolor"] = new_alpha(to_rgba(color), bar_alpha)
         container = ax.bar(
             x_positions,
             values,
             bar_width,
             bottom=bottoms,
             linewidth=float(style["bar_edge_width"]),
-            alpha=float(style["bar_alpha"]),
             hatch=pattern,
             label=stack_label,
             zorder=3,
             **color_kwargs,
         )
-        if color is None:
-            for patch in container.patches:
-                patch.set_edgecolor(
-                    str(style["axis_color"]) if pattern else patch.get_facecolor()
+        for patch in container.patches:
+            if color is None:
+                patch.set_facecolor(
+                    new_alpha(to_rgba(patch.get_facecolor()), bar_alpha)
                 )
+            patch.set_edgecolor(bar_edge_color)
+            patch.set_alpha(None)
         bottoms = [bottom + value for bottom, value in zip(bottoms, values)]
 
     ax.set_xticks(list(x_positions))

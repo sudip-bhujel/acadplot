@@ -67,9 +67,7 @@ def _write_save_metadata(
     from .styles import get_current_style
 
     metadata_path = (
-        targets[0].with_suffix(".acadplot.json")
-        if metadata is True
-        else Path(metadata)
+        targets[0].with_suffix(".acadplot.json") if metadata is True else Path(metadata)
     )
     metadata_path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
@@ -78,7 +76,9 @@ def _write_save_metadata(
         "matplotlib_version": matplotlib_version,
         "style": get_current_style(),
     }
-    metadata_path.write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")
+    metadata_path.write_text(
+        json.dumps(payload, indent=2, default=str), encoding="utf-8"
+    )
     return metadata_path
 
 
@@ -178,7 +178,9 @@ def _legend_location(location: str, legend_outside: bool | str) -> dict[str, obj
         "bottom": {"loc": "upper center", "bbox_to_anchor": (0.5, -0.18)},
     }
     if side not in outside_locations:
-        raise ValueError("legend_outside must be True, False, or one of: right, left, top, bottom.")
+        raise ValueError(
+            "legend_outside must be True, False, or one of: right, left, top, bottom."
+        )
     return outside_locations[side]
 
 
@@ -337,7 +339,9 @@ def theme_preview(
         )
         for col_idx, color in enumerate(palette):
             ax.add_patch(
-                Rectangle((col_idx, row_idx), 0.9, 0.72, facecolor=color, edgecolor="none")
+                Rectangle(
+                    (col_idx, row_idx), 0.9, 0.72, facecolor=color, edgecolor="none"
+                )
             )
 
     ax.set_xlim(-1.2, max(len(THEMES[name].palette) for name in selected_themes))
@@ -395,16 +399,16 @@ markers = {
 
 patterns = {
     "none": "",
-    "diagonal": "/",
-    "back_diagonal": "\\",
-    "cross": "x",
-    "plus": "+",
-    "dots": ".",
-    "circles": "o",
-    "stars": "*",
-    "horizontal": "-",
-    "vertical": "|",
-    "grid": "++",
+    "diagonal": "///",
+    "back_diagonal": "\\\\\\",
+    "cross": "xxx",
+    "plus": "+++",
+    "dots": "...",
+    "circles": "ooo",
+    "stars": "***",
+    "horizontal": "---",
+    "vertical": "|||",
+    "grid": "++++",
 }
 
 

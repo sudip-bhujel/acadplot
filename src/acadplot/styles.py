@@ -105,7 +105,7 @@ LAYOUTS = {
         grid_alpha=0.28,
         minor_grid_alpha=0.14,
         bar_alpha=0.86,
-        bar_edge_width=0.25,
+        bar_edge_width=0.65,
         legend_frameon=True,
         legend_framealpha=0.6,
         legend_frame_linewidth=0.2,
@@ -126,7 +126,7 @@ LAYOUTS = {
         grid_alpha=0.24,
         minor_grid_alpha=0.11,
         bar_alpha=0.88,
-        bar_edge_width=0.32,
+        bar_edge_width=0.75,
         legend_frameon=True,
         legend_framealpha=0.6,
         legend_frame_linewidth=0.2,
@@ -147,7 +147,7 @@ LAYOUTS = {
         grid_alpha=0.2,
         minor_grid_alpha=0.1,
         bar_alpha=0.86,
-        bar_edge_width=0.2,
+        bar_edge_width=0.5,
         legend_frameon=True,
         legend_framealpha=0.6,
         legend_frame_linewidth=0.16,
@@ -172,7 +172,7 @@ LAYOUTS = {
         grid_alpha=0.26,
         minor_grid_alpha=0.12,
         bar_alpha=0.88,
-        bar_edge_width=0.3,
+        bar_edge_width=0.7,
         legend_frameon=True,
         legend_framealpha=0.6,
         legend_frame_linewidth=0.2,
@@ -193,7 +193,7 @@ LAYOUTS = {
         grid_alpha=0.24,
         minor_grid_alpha=0.12,
         bar_alpha=0.9,
-        bar_edge_width=0.45,
+        bar_edge_width=0.9,
         legend_frameon=True,
         legend_framealpha=0.65,
         legend_frame_linewidth=0.25,
@@ -455,19 +455,27 @@ def _build_style(
     ) * scale
     if resolved_font_size <= 0:
         raise ValueError("font_size must be a positive number.")
-    default_label_size = _scaled_size(layout_profile.label_size, resolved_font_size, scale)
-    default_tick_size = _scaled_size(layout_profile.tick_size, resolved_font_size, scale)
+    default_label_size = _scaled_size(
+        layout_profile.label_size, resolved_font_size, scale
+    )
+    default_tick_size = _scaled_size(
+        layout_profile.tick_size, resolved_font_size, scale
+    )
     default_legend_size = _scaled_size(
         layout_profile.legend_size, resolved_font_size, scale
     )
-    default_title_size = _scaled_size(layout_profile.title_size, resolved_font_size, scale)
+    default_title_size = _scaled_size(
+        layout_profile.title_size, resolved_font_size, scale
+    )
     resolved_label_size = _resolve_size("label_size", label_size, default_label_size)
     resolved_tick_size = _resolve_size("tick_size", tick_size, default_tick_size)
     resolved_legend_size = _resolve_size(
         "legend_size", legend_size, default_legend_size
     )
     resolved_title_size = _resolve_size("title_size", title_size, default_title_size)
-    resolved_text_color = _resolve_color("text_color", text_color, theme_profile.text_color)
+    resolved_text_color = _resolve_color(
+        "text_color", text_color, theme_profile.text_color
+    )
     if text_color is None:
         resolved_axis_label_color = theme_profile.axis_label_color
         resolved_tick_color = theme_profile.tick_color
@@ -511,6 +519,7 @@ def _build_style(
         "minor_grid_alpha": layout_profile.minor_grid_alpha,
         "bar_alpha": layout_profile.bar_alpha,
         "bar_edge_width": layout_profile.bar_edge_width * scale,
+        "bar_edge_color": "#000000",
         "legend_frameon": layout_profile.legend_frameon,
         "legend_framealpha": layout_profile.legend_framealpha,
         "legend_frame_linewidth": layout_profile.legend_frame_linewidth * scale,

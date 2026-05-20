@@ -103,24 +103,24 @@ def draw_bar(
     color = resolve_color_key(color_key)
     pattern = resolve_pattern_key(pattern_key)
     style = get_current_style()
-    if color is None:
-        color_kwargs = {}
-    elif pattern:
-        color_kwargs = {"color": color, "edgecolor": str(style["axis_color"])}
-    else:
-        color_kwargs = {"color": color, "edgecolor": color}
+    bar_alpha = float(style["bar_alpha"])
+    bar_edge_color = str(style["bar_edge_color"])
+    color_kwargs = {"edgecolor": str(style["bar_edge_color"])}
+    if color is not None:
+        color_kwargs["facecolor"] = new_alpha(to_rgba(color), bar_alpha)
 
     container = ax.bar(
         x,
         y,
         width,
         linewidth=float(style["bar_edge_width"]),
-        alpha=float(style["bar_alpha"]),
         hatch=pattern,
         label=label,
         zorder=3,
         **color_kwargs,
     )
-    if color is None:
-        for patch in container.patches:
-            patch.set_edgecolor(str(style["axis_color"]) if pattern else patch.get_facecolor())
+    for patch in container.patches:
+        if color is None:
+            patch.set_facecolor(new_alpha(to_rgba(patch.get_facecolor()), bar_alpha))
+        patch.set_edgecolor(bar_edge_color)
+        patch.set_alpha(None)

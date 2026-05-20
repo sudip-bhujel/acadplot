@@ -5,6 +5,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.colors import to_rgba
 
 from acadplot import (
     available_fonts,
@@ -296,6 +297,13 @@ def test_explicit_bar_overrides_and_default_grid():
     assert ax.xaxis.label.get_size() == 9.0
     assert ax.xaxis.label.get_color() == get_current_style()["axis_label_color"]
     assert ax.spines["bottom"].get_edgecolor()
+    expected_edge_rgb = to_rgba(get_current_style()["bar_edge_color"])[:3]
+    assert all(patch.get_edgecolor()[:3] == expected_edge_rgb for patch in ax.patches)
+    assert all(patch.get_edgecolor()[3] == 1.0 for patch in ax.patches)
+    assert all(
+        patch.get_facecolor()[3] == get_current_style()["bar_alpha"]
+        for patch in ax.patches
+    )
     legend = ax.get_legend()
     assert legend is not None
     assert legend.get_frame_on()
@@ -325,7 +333,10 @@ def test_bar_patterns_apply_to_bar_variants():
         patterns=["diagonal", "cross"],
         fname=None,
     )
-    assert [patch.get_hatch() for patch in ax.patches] == ["/", "x"]
+    assert [patch.get_hatch() for patch in ax.patches] == ["///", "xxx"]
+    expected_edge_rgb = to_rgba(get_current_style()["bar_edge_color"])[:3]
+    assert all(patch.get_edgecolor()[:3] == expected_edge_rgb for patch in ax.patches)
+    assert all(patch.get_edgecolor()[3] == 1.0 for patch in ax.patches)
     plt.close(fig)
 
     fig, ax = plot_grouped_bar(
@@ -336,7 +347,14 @@ def test_bar_patterns_apply_to_bar_variants():
         "upper left",
         fname=None,
     )
-    assert [patch.get_hatch() for patch in ax.patches] == ["/", "/", "x", "x"]
+    assert [patch.get_hatch() for patch in ax.patches] == [
+        "///",
+        "///",
+        "xxx",
+        "xxx",
+    ]
+    assert all(patch.get_edgecolor()[:3] == expected_edge_rgb for patch in ax.patches)
+    assert all(patch.get_edgecolor()[3] == 1.0 for patch in ax.patches)
     plt.close(fig)
 
     fig, ax = plot_stacked_bar(
@@ -345,7 +363,14 @@ def test_bar_patterns_apply_to_bar_variants():
         "upper left",
         fname=None,
     )
-    assert [patch.get_hatch() for patch in ax.patches] == ["/", "/", "x", "x"]
+    assert [patch.get_hatch() for patch in ax.patches] == [
+        "///",
+        "///",
+        "xxx",
+        "xxx",
+    ]
+    assert all(patch.get_edgecolor()[:3] == expected_edge_rgb for patch in ax.patches)
+    assert all(patch.get_edgecolor()[3] == 1.0 for patch in ax.patches)
     plt.close(fig)
 
 

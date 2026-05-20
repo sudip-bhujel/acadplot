@@ -562,7 +562,8 @@ plot_grouped_bar(
 
 Use named pattern presets, integer pattern indices, or raw Matplotlib hatch
 strings. Patterns work for `plot_bar`, `plot_grouped_bar`, and
-`plot_stacked_bar`.
+`plot_stacked_bar`. Bar plots use a solid black border by default, which keeps
+adjacent bars and hatch patterns legible in print and grayscale output.
 
 ```python
 from acadplot import plot_grouped_bar, configure_plot_style, available_patterns
