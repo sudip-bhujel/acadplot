@@ -44,6 +44,12 @@ def _resolve_text_sizes(style, font_size, label_size, tick_size, legend_size):
     return font_size, label_size, tick_size, legend_size
 
 
+def _apply_bar_axis_style(ax, tick_size: float) -> None:
+    ax.tick_params(axis="both", labelsize=tick_size)
+    apply_axis_style(ax)
+    ax.tick_params(axis="x", length=0)
+
+
 def _parse_bar(bar):
     if len(bar) == 5:
         x, y, color_key, pattern_key, bar_label = bar
@@ -186,8 +192,7 @@ def plot_bar(
         ax.set_xticks(bars[0][0])
         ax.set_xticklabels(xticklabels, rotation=rotation, fontsize=tick_size)
 
-    ax.tick_params(axis="both", labelsize=tick_size)
-    apply_axis_style(ax)
+    _apply_bar_axis_style(ax, tick_size)
 
     if fname:
         save(fig, fname, close=False)
@@ -269,8 +274,7 @@ def plot_grouped_bar(
     ax.set_xticklabels([g[0] for g in groups], rotation=rotation, fontsize=tick_size)
 
     _add_legend(ax, location, legend_size, ncols, columnspacing, legend_outside)
-    ax.tick_params(axis="both", labelsize=tick_size)
-    apply_axis_style(ax)
+    _apply_bar_axis_style(ax, tick_size)
 
     if fname:
         save(fig, fname, close=False)
@@ -374,8 +378,7 @@ def plot_stacked_bar(
     ax.set_xticklabels(categories, rotation=rotation, fontsize=tick_size)
 
     _add_legend(ax, location, legend_size, ncols, columnspacing, legend_outside)
-    ax.tick_params(axis="both", labelsize=tick_size)
-    apply_axis_style(ax)
+    _apply_bar_axis_style(ax, tick_size)
 
     if fname:
         save(fig, fname, close=False)

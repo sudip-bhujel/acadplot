@@ -139,7 +139,7 @@ def generate_bar_examples() -> None:
 
 def generate_pattern_bar_example() -> None:
     configure_plot_style(
-        layout="paper-1col", theme="classic", latex=True, text_color="dark"
+        layout="paper-1col", theme="colorblind", latex=True, text_color="dark"
     )
     fig, _ = plot_grouped_bar(
         [

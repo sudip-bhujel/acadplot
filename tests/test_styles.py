@@ -318,6 +318,7 @@ def test_explicit_bar_overrides_and_default_grid():
     assert ax.get_axisbelow()
     assert any(line.get_visible() for line in ax.get_ygridlines())
     assert not any(line.get_visible() for line in ax.get_xgridlines())
+    assert all(tick.tick1line.get_markersize() == 0 for tick in ax.xaxis.majorTicks)
     plt.close(fig)
 
 
