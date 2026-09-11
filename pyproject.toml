@@ -1,9 +1,10 @@
 [project]
 name = "acadplot"
-version = "0.1.0"
+version = "0.1.1"
 description = "A simple plotting tool using matplotlib for generating plots and subplots for research papers."
 readme = "README.md"
-license = { text = "MIT" }
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [
     { name = "Sudip Bhujel", email = "code@sudipbhujel.com.np" }
 ]
@@ -15,3 +16,6 @@ dependencies = [
 [build-system]
 requires = ["uv_build>=0.9.7,<0.10.0"]
 build-backend = "uv_build"
+
+[tool.uv.build-backend]
+source-exclude = [".DS_Store"]

@@ -16,35 +16,35 @@ The committed examples use LaTeX Inconsolata; regeneration requires a TeX instal
 
 ### Core Figures
 
-<img src="examples/plot.png" width="400">
+<img src="https://raw.githubusercontent.com/sudip-bhujel/acadplot/main/examples/plot.png" width="400">
 
-<img src="examples/subplot.png" width="500">
+<img src="https://raw.githubusercontent.com/sudip-bhujel/acadplot/main/examples/subplot.png" width="500">
 
-<img src="examples/top_legend_plot.png" width="400">
+<img src="https://raw.githubusercontent.com/sudip-bhujel/acadplot/main/examples/top_legend_plot.png" width="400">
 
-<img src="examples/text_color_styles.png" width="500">
+<img src="https://raw.githubusercontent.com/sudip-bhujel/acadplot/main/examples/text_color_styles.png" width="500">
 
 ### Bar Figures
 
-<img src="examples/bar_plot.png" width="400">
+<img src="https://raw.githubusercontent.com/sudip-bhujel/acadplot/main/examples/bar_plot.png" width="400">
 
-<img src="examples/grouped_bar_plot.png" width="500">
+<img src="https://raw.githubusercontent.com/sudip-bhujel/acadplot/main/examples/grouped_bar_plot.png" width="500">
 
-<img src="examples/stacked_bar_plot.png" width="400">
+<img src="https://raw.githubusercontent.com/sudip-bhujel/acadplot/main/examples/stacked_bar_plot.png" width="400">
 
-<img src="examples/pattern_bar_plot.png" width="400">
+<img src="https://raw.githubusercontent.com/sudip-bhujel/acadplot/main/examples/pattern_bar_plot.png" width="400">
 
 ### Additional Academic Figures
 
-<img src="examples/scatter_plot.png" width="400">
+<img src="https://raw.githubusercontent.com/sudip-bhujel/acadplot/main/examples/scatter_plot.png" width="400">
 
-<img src="examples/errorbar_plot.png" width="400">
+<img src="https://raw.githubusercontent.com/sudip-bhujel/acadplot/main/examples/errorbar_plot.png" width="400">
 
-<img src="examples/box_plot.png" width="400">
+<img src="https://raw.githubusercontent.com/sudip-bhujel/acadplot/main/examples/box_plot.png" width="400">
 
-<img src="examples/heatmap.png" width="400">
+<img src="https://raw.githubusercontent.com/sudip-bhujel/acadplot/main/examples/heatmap.png" width="400">
 
-<img src="examples/utility_panel.png" width="500">
+<img src="https://raw.githubusercontent.com/sudip-bhujel/acadplot/main/examples/utility_panel.png" width="500">
 
 ### Style Coverage
 
@@ -58,11 +58,11 @@ The examples cover all built-in themes and layout profiles:
 - `mono` with `paper-1col`: stacked bar plot
 - `warm` with `presentation`: presentation-scale line plot
 
-<img src="examples/presentation_style.png" width="500">
+<img src="https://raw.githubusercontent.com/sudip-bhujel/acadplot/main/examples/presentation_style.png" width="500">
 
-<img src="examples/monospace_style.png" width="400">
+<img src="https://raw.githubusercontent.com/sudip-bhujel/acadplot/main/examples/monospace_style.png" width="400">
 
-<img src="examples/style_gallery.png" width="500">
+<img src="https://raw.githubusercontent.com/sudip-bhujel/acadplot/main/examples/style_gallery.png" width="500">
 
 
 ## Features
@@ -79,16 +79,16 @@ The examples cover all built-in themes and layout profiles:
 
 ## Installation
 
-### From GitHub
+Install from PyPI with `uv`:
 
 ```bash
-pip install git+https://github.com/sudip-bhujel/acadplot.git
+uv add acadplot
 ```
 
-or with `uv`:
+Or with `pip`:
 
 ```bash
-uv add git+https://github.com/sudip-bhujel/acadplot.git
+pip install acadplot
 ```
 
 ### Local Installation (Development)
