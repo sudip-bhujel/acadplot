@@ -264,7 +264,7 @@ def plot_box(
 
     box = ax.boxplot(
         values,
-        labels=labels,
+        tick_labels=labels,
         patch_artist=True,
         widths=0.55,
         medianprops=dict(color=str(style["axis_color"])),

@@ -103,7 +103,7 @@ pip install -e .
 
 ## Requirements
 
-- Python >= 3.14
+- Python >= 3.12
 - matplotlib >= 3.10.8
 
 ## Usage

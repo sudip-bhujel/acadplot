@@ -1,6 +1,6 @@
 [project]
 name = "acadplot"
-version = "0.1.1"
+version = "0.1.2"
 description = "A simple plotting tool using matplotlib for generating plots and subplots for research papers."
 readme = "README.md"
 license = "MIT"
@@ -8,7 +8,7 @@ license-files = ["LICENSE"]
 authors = [
     { name = "Sudip Bhujel", email = "code@sudipbhujel.com.np" }
 ]
-requires-python = ">=3.14"
+requires-python = ">=3.12"
 dependencies = [
     "matplotlib>=3.10.8",
 ]
